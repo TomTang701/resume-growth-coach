@@ -24,10 +24,24 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-Run the app:
+After setup, launch the app with the one-click helper from the project root:
 
 ```powershell
-uvicorn app.main:app --reload
+.\Start-ResumeGrowthCoach.ps1
+```
+
+You can also double-click:
+
+```text
+Start-ResumeGrowthCoach.cmd
+```
+
+Both launchers start the FastAPI server and open the local web page automatically.
+
+Manual run command:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
 Open:
@@ -41,6 +55,34 @@ Run tests:
 ```powershell
 pytest
 ```
+
+## User Interface Walkthrough
+
+The screenshots below use sanitized template data only. They do not include a real person's name, contact information, resume, or job application details.
+
+### Start Screen
+
+Paste a sanitized resume and a target job description into the two input boxes.
+
+![Empty Resume Growth Coach screen](docs/images/01-empty-screen.png)
+
+### Template Input
+
+The left panel keeps the submitted resume and job description visible so the user can verify what was analyzed.
+
+![Filled sanitized template input](docs/images/02-filled-template.png)
+
+### Analysis Results
+
+The right panel shows the deterministic fit score, the Ollama status and model name, matched skills, missing skills, evidence, roadmap, recommended jobs, and resume bullet drafts.
+
+![Analysis results with sanitized sample data](docs/images/03-analysis-results.png)
+
+### Matching Job Recommendations
+
+The app also recommends the top matching job directions for the resume, with a score and a short reason for each option.
+
+![Recommended matching jobs section](docs/images/04-job-recommendations.png)
 
 ## Optional Ollama Setup
 
@@ -72,4 +114,3 @@ These bullets should only be used after the matching implementation, persistence
 - Implemented deterministic skill matching and gap scoring before LLM generation, reducing dependence on prompt-only analysis.
 - Added PDF/text parsing, persisted analysis history, and generated 2-week, 1-month, and 3-month self-improvement roadmaps.
 - Tested document upload, analysis, and offline LLM fallback flows with pytest and FastAPI TestClient.
-

@@ -12,7 +12,7 @@ from app.database import get_db, init_db
 from app.schemas import AnalysisCreate, AnalysisCreateResponse, DocumentResponse
 from app.services.goals import build_growth_goals
 from app.services.job_recommendations import recommend_matching_jobs
-from app.services.matching import analyze_resume_against_job, extract_skills
+from app.services.matching import analyze_resume_against_job, extract_skills, infer_role_title
 from app.services.ollama import generate_llm_analysis
 from app.services.parsing import detect_resume_sections, extract_input_text, preview_text
 
@@ -199,6 +199,8 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         "overall_fit_score": analysis.fit_score,
         "ollama_status": analysis.model_status,
         "ollama_model": analysis.model_name,
+        "ollama_display": build_model_display(analysis.model_status, analysis.model_name),
+        "target_role_title": infer_role_title(analysis.job_description.content) or "Target Job Description",
         "matched_skills": deterministic["matched_skills"],
         "missing_skills": deterministic["missing_skills"],
         "matched_keywords": deterministic["matched_keywords"],
@@ -207,7 +209,13 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         "recommended_improvement_areas": deterministic["recommended_improvement_areas"],
         "growth_roadmap": goals,
         "recommended_project_additions": deterministic.get("project_suggestions", []),
-        "recommended_matching_jobs": recommend_matching_jobs(analysis.resume.content),
+        "recommended_matching_jobs": recommend_matching_jobs(analysis.resume.content, analysis.job_description.content),
         "english_resume_bullet_drafts": deterministic.get("resume_bullet_drafts", []),
         "deterministic_details": deterministic,
     }
+
+
+def build_model_display(status: str, model_name: str) -> str:
+    if status == "available":
+        return f"Using {model_name}"
+    return f"Fallback mode; configured model {model_name} was not used"

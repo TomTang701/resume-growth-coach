@@ -22,3 +22,12 @@ def test_backend_resume_prefers_backend_or_software_roles():
     jobs = recommend_matching_jobs(resume)
 
     assert jobs[0]["title"] in {"Backend Software Engineer", "Software Engineer"}
+
+
+def test_recommendations_exclude_current_target_role():
+    resume = "Python Java SQL Git computer science student with machine learning and cloud skills."
+
+    jobs = recommend_matching_jobs(resume, current_job_text="Software Engineer")
+
+    assert all(job["title"] != "Software Engineer" for job in jobs)
+    assert len(jobs) == 3

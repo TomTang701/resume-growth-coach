@@ -1,4 +1,4 @@
-from app.services.matching import analyze_resume_against_job
+from app.services.matching import analyze_resume_against_job, infer_role_title
 
 
 JOB_PROFILES: tuple[dict[str, str], ...] = (
@@ -48,9 +48,12 @@ JOB_PROFILES: tuple[dict[str, str], ...] = (
 )
 
 
-def recommend_matching_jobs(resume_text: str, limit: int = 3) -> list[dict]:
+def recommend_matching_jobs(resume_text: str, current_job_text: str = "", limit: int = 3) -> list[dict]:
+    current_title = infer_role_title(current_job_text)
     scored: list[dict] = []
     for profile in JOB_PROFILES:
+        if current_title and normalize_title(profile["title"]) == normalize_title(current_title):
+            continue
         result = analyze_resume_against_job(resume_text, profile["description"])
         scored.append(
             {
@@ -75,3 +78,7 @@ def build_reason(title: str, matched_skills: list[str], missing_skills: list[str
     if missing_skills:
         reason += f" The main gaps to close are {', '.join(missing_skills[:3])}."
     return reason
+
+
+def normalize_title(title: str) -> str:
+    return "".join(char.lower() for char in title if char.isalnum())

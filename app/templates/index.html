@@ -31,13 +31,14 @@
           {% elif result %}
             <div class="score-row">
               <div>
-                <p class="eyebrow">Fit score</p>
+                <p class="eyebrow">Target JD fit score</p>
                 <div class="score">{{ result.overall_fit_score }}</div>
+                <small class="score-caption">{{ result.target_role_title }}</small>
               </div>
               <div class="status">
                 <span>Model status</span>
                 <strong>{{ result.ollama_status }}</strong>
-                <small>{{ result.ollama_model }}</small>
+                <small>{{ result.ollama_display }}</small>
               </div>
             </div>
 
@@ -93,7 +94,8 @@
             </section>
 
             <section>
-              <h2>Recommended Matching Jobs</h2>
+              <h2>Alternative Matching Jobs</h2>
+              <p class="section-note">These are separate resume-to-role scores for adjacent roles, excluding the current target job.</p>
               <div class="job-list">
                 {% for job in result.recommended_matching_jobs %}
                   <article class="job-match">

@@ -54,6 +54,8 @@ def test_document_analysis_and_goals_flow(tmp_path):
     assert detail["english_resume_bullet_drafts"]
     assert len(detail["recommended_matching_jobs"]) == 3
     assert detail["recommended_matching_jobs"][0]["title"]
+    assert detail["ollama_model"]
+    assert detail["ollama_display"]
 
     goals_response = client.get(f"/api/goals/{body['analysis_id']}")
     assert goals_response.status_code == 200
@@ -80,7 +82,8 @@ def test_ui_preserves_submitted_text_and_varies_score(tmp_path):
     assert resume in response.text
     assert job in response.text
     assert "20.0" not in response.text
-    assert "Recommended Matching Jobs" in response.text
+    assert "Alternative Matching Jobs" in response.text
+    assert "excluding the current target job" in response.text
 
 
 def test_empty_resume_is_rejected(tmp_path):

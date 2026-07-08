@@ -189,6 +189,26 @@ def extract_skills(text: str) -> list[str]:
 
 
 def infer_role_skills(job_text: str) -> list[str]:
+    role = infer_role_key(job_text)
+    if role:
+        return sorted(ROLE_SKILL_TEMPLATES[role])
+    return []
+
+
+def infer_role_title(job_text: str) -> str:
+    role = infer_role_key(job_text)
+    role_titles = {
+        "machine_learning_engineer": "Machine Learning Engineer",
+        "backend_engineer": "Backend Software Engineer",
+        "frontend_engineer": "Frontend Developer",
+        "full_stack_engineer": "Full Stack Developer",
+        "data_analyst": "Data Analyst",
+        "software_engineer": "Software Engineer",
+    }
+    return role_titles.get(role, "")
+
+
+def infer_role_key(job_text: str) -> str:
     normalized = normalize_for_matching(job_text)
     role_patterns: tuple[tuple[str, tuple[str, ...]], ...] = (
         ("machine_learning_engineer", ("machine learning engineer", "ml engineer", "ai engineer")),
@@ -200,8 +220,8 @@ def infer_role_skills(job_text: str) -> list[str]:
     )
     for role, patterns in role_patterns:
         if any(pattern in normalized for pattern in patterns):
-            return sorted(ROLE_SKILL_TEMPLATES[role])
-    return []
+            return role
+    return ""
 
 
 def alias_present(normalized_text: str, alias: str) -> bool:

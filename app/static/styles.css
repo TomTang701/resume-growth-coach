@@ -123,6 +123,20 @@ button:hover {
   line-height: 1;
 }
 
+.score-caption,
+.section-note {
+  color: #64708a;
+}
+
+.score-caption {
+  display: block;
+  margin-top: 4px;
+}
+
+.section-note {
+  margin-bottom: 12px;
+}
+
 .status {
   text-align: right;
 }

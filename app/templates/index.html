@@ -37,6 +37,7 @@
               <div class="status">
                 <span>Model status</span>
                 <strong>{{ result.ollama_status }}</strong>
+                <small>{{ result.ollama_model }}</small>
               </div>
             </div>
 
@@ -89,6 +90,21 @@
                   {% endfor %}
                 </ul>
               {% endfor %}
+            </section>
+
+            <section>
+              <h2>Recommended Matching Jobs</h2>
+              <div class="job-list">
+                {% for job in result.recommended_matching_jobs %}
+                  <article class="job-match">
+                    <div>
+                      <h3>{{ job.title }}</h3>
+                      <p>{{ job.reason }}</p>
+                    </div>
+                    <strong>{{ job.fit_score }}</strong>
+                  </article>
+                {% endfor %}
+              </div>
             </section>
 
             <section>

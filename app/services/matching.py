@@ -46,7 +46,7 @@ SKILL_ALIASES: dict[str, tuple[str, ...]] = {
     "Backend Development": ("backend", "back end", "server-side", "后端"),
     "Frontend Development": ("frontend", "front end", "前端"),
     "Database Design": ("database", "data model", "数据库"),
-    "Testing": ("testing", "test automation", "测试"),
+    "Testing": ("testing", "test automation", "pytest", "unit test", "junit", "测试"),
     "Data Analysis": ("pandas", "numpy", "analytics", "dashboard", "数据分析"),
     "Machine Learning": ("machine learning", "ml", "scikit", "pytorch", "tensorflow", "机器学习"),
 }

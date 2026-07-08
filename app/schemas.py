@@ -19,4 +19,4 @@ class AnalysisCreateResponse(BaseModel):
     analysis_id: int
     deterministic_fit_score: float
     ollama_status: str
-
+    ollama_model: str

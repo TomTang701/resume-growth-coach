@@ -133,6 +133,12 @@ button:hover {
   font-size: 0.85rem;
 }
 
+.status small {
+  display: block;
+  color: #64708a;
+  margin-top: 4px;
+}
+
 .grid-two {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -150,6 +156,33 @@ ul {
 
 li {
   margin-bottom: 7px;
+}
+
+.job-list {
+  display: grid;
+  gap: 10px;
+}
+
+.job-match {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #dfe3ea;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.job-match h3,
+.job-match p {
+  margin: 0;
+}
+
+.job-match h3 {
+  margin-bottom: 6px;
+}
+
+.job-match strong {
+  font-size: 1.25rem;
 }
 
 .empty-state,
@@ -185,4 +218,3 @@ li {
     min-height: auto;
   }
 }
-

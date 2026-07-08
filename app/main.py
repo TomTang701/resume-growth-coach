@@ -11,6 +11,7 @@ from app import models
 from app.database import get_db, init_db
 from app.schemas import AnalysisCreate, AnalysisCreateResponse, DocumentResponse
 from app.services.goals import build_growth_goals
+from app.services.job_recommendations import recommend_matching_jobs
 from app.services.matching import analyze_resume_against_job, extract_skills
 from app.services.ollama import generate_llm_analysis
 from app.services.parsing import detect_resume_sections, extract_input_text, preview_text
@@ -91,6 +92,7 @@ def create_analysis(payload: AnalysisCreate, db: Session = Depends(get_db)) -> A
         analysis_id=analysis.id,
         deterministic_fit_score=analysis.fit_score,
         ollama_status=analysis.model_status,
+        ollama_model=analysis.model_name,
     )
 
 
@@ -196,6 +198,7 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         "fit_summary": analysis.summary,
         "overall_fit_score": analysis.fit_score,
         "ollama_status": analysis.model_status,
+        "ollama_model": analysis.model_name,
         "matched_skills": deterministic["matched_skills"],
         "missing_skills": deterministic["missing_skills"],
         "matched_keywords": deterministic["matched_keywords"],
@@ -204,6 +207,7 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         "recommended_improvement_areas": deterministic["recommended_improvement_areas"],
         "growth_roadmap": goals,
         "recommended_project_additions": deterministic.get("project_suggestions", []),
+        "recommended_matching_jobs": recommend_matching_jobs(analysis.resume.content),
         "english_resume_bullet_drafts": deterministic.get("resume_bullet_drafts", []),
         "deterministic_details": deterministic,
     }

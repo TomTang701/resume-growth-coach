@@ -44,6 +44,7 @@ def test_document_analysis_and_goals_flow(tmp_path):
     body = analysis_response.json()
     assert body["analysis_id"] > 0
     assert body["ollama_status"] in {"available", "offline_fallback"}
+    assert body["ollama_model"]
 
     detail_response = client.get(f"/api/analyses/{body['analysis_id']}")
     assert detail_response.status_code == 200
@@ -51,6 +52,8 @@ def test_document_analysis_and_goals_flow(tmp_path):
     assert "FastAPI" in detail["matched_skills"]
     assert "Docker" in detail["missing_skills"]
     assert detail["english_resume_bullet_drafts"]
+    assert len(detail["recommended_matching_jobs"]) == 3
+    assert detail["recommended_matching_jobs"][0]["title"]
 
     goals_response = client.get(f"/api/goals/{body['analysis_id']}")
     assert goals_response.status_code == 200
@@ -77,6 +80,7 @@ def test_ui_preserves_submitted_text_and_varies_score(tmp_path):
     assert resume in response.text
     assert job in response.text
     assert "20.0" not in response.text
+    assert "Recommended Matching Jobs" in response.text
 
 
 def test_empty_resume_is_rejected(tmp_path):

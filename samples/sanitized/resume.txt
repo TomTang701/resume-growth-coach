@@ -1,0 +1,14 @@
+Alex Morgan
+Software Engineering Student
+
+Education
+M.S. Computer Science coursework with focus on databases, algorithms, and software engineering.
+
+Skills
+Python, FastAPI, SQLite, SQLAlchemy, REST APIs, pytest, Git, HTML, CSS
+
+Projects
+- Built a FastAPI task tracker with SQLite persistence, SQLAlchemy models, and REST API endpoints.
+- Implemented pytest coverage for document upload, validation, and API response behavior.
+- Created a small HTML dashboard for reviewing backend workflow outputs.
+

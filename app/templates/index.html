@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resume Growth Coach</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="workspace">
+        <div class="input-panel">
+          <div>
+            <p class="eyebrow">Local-first resume analysis</p>
+            <h1>Resume Growth Coach</h1>
+          </div>
+          <form action="/ui/analyze" method="post" class="analysis-form">
+            <label for="resume_text">Resume text</label>
+            <textarea id="resume_text" name="resume_text" required placeholder="Paste a sanitized resume here.">{{ form_values.resume_text }}</textarea>
+
+            <label for="job_description_text">Job description</label>
+            <textarea id="job_description_text" name="job_description_text" required placeholder="Paste a target job description here.">{{ form_values.job_description_text }}</textarea>
+
+            <button type="submit">Run analysis</button>
+          </form>
+        </div>
+
+        <div class="result-panel">
+          {% if error %}
+            <div class="notice error">{{ error }}</div>
+          {% elif result %}
+            <div class="score-row">
+              <div>
+                <p class="eyebrow">Fit score</p>
+                <div class="score">{{ result.overall_fit_score }}</div>
+              </div>
+              <div class="status">
+                <span>Model status</span>
+                <strong>{{ result.ollama_status }}</strong>
+              </div>
+            </div>
+
+            <section>
+              <h2>Fit Summary</h2>
+              <p>{{ result.fit_summary }}</p>
+            </section>
+
+            <section class="grid-two">
+              <div>
+                <h2>Matched Skills</h2>
+                <ul>
+                  {% for skill in result.matched_skills %}
+                    <li>{{ skill }}</li>
+                  {% else %}
+                    <li>No direct skill matches found yet.</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div>
+                <h2>Missing Skills</h2>
+                <ul>
+                  {% for skill in result.missing_skills %}
+                    <li>{{ skill }}</li>
+                  {% else %}
+                    <li>No required skill gaps detected.</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </section>
+
+            <section>
+              <h2>Evidence Found In Resume</h2>
+              <ul>
+                {% for item in result.evidence_found_in_resume %}
+                  <li>{{ item }}</li>
+                {% else %}
+                  <li>No project evidence was detected for matched skills.</li>
+                {% endfor %}
+              </ul>
+            </section>
+
+            <section>
+              <h2>Growth Roadmap</h2>
+              {% for horizon, goals in result.growth_roadmap.items() %}
+                <h3>{{ horizon }}</h3>
+                <ul>
+                  {% for goal in goals %}
+                    <li>{{ goal }}</li>
+                  {% endfor %}
+                </ul>
+              {% endfor %}
+            </section>
+
+            <section>
+              <h2>Resume Bullet Drafts</h2>
+              <ul>
+                {% for bullet in result.english_resume_bullet_drafts %}
+                  <li>{{ bullet }}</li>
+                {% endfor %}
+              </ul>
+            </section>
+          {% else %}
+            <div class="empty-state">
+              <h2>Paste a resume and job description to begin.</h2>
+              <p>The deterministic analyzer runs first. Ollama is optional and falls back cleanly when offline.</p>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

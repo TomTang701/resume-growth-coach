@@ -1,0 +1,75 @@
+# Resume Growth Coach
+
+Resume Growth Coach is a local-first AI backend project that compares a resume with a target job description, identifies skill and evidence gaps, and produces a practical growth roadmap.
+
+The project runs deterministic analysis before any LLM generation. Ollama is optional: when it is offline, the app still returns a fit score, matched skills, missing skills, project evidence, and fallback goals.
+
+## Features
+
+- FastAPI backend with JSON APIs and a local HTML UI
+- SQLite persistence through SQLAlchemy
+- Pasted text and `.txt` / `.pdf` document input
+- Deterministic skill matching and explainable fit scoring
+- Optional Ollama summaries with offline fallback
+- Growth goals for 2-week, 1-month, and 3-month horizons
+- pytest coverage for parsing, matching, API flow, and fallback behavior
+
+## Quick Start
+
+Create and activate a virtual environment, then install dependencies:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+Run the app:
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+Open:
+
+```text
+http://127.0.0.1:8000
+```
+
+Run tests:
+
+```powershell
+pytest
+```
+
+## Optional Ollama Setup
+
+Install Ollama and pull the default model:
+
+```powershell
+ollama pull qwen2.5:3b
+```
+
+If Ollama is not running, the application still returns deterministic analysis.
+
+## API Overview
+
+- `POST /api/documents/resume`
+- `POST /api/documents/job-description`
+- `POST /api/analyses`
+- `GET /api/analyses/{analysis_id}`
+- `GET /api/goals/{analysis_id}`
+
+## Privacy Notes
+
+Do not commit real resumes, real job descriptions, local databases, upload folders, or `.env` files. Use only sanitized sample data in public repositories.
+
+## Sample Resume Bullets
+
+These bullets should only be used after the matching implementation, persistence, UI, and tests are verified:
+
+- Built a local-first AI resume growth coach with FastAPI, SQLite, SQLAlchemy, and Ollama to compare resumes against job descriptions.
+- Implemented deterministic skill matching and gap scoring before LLM generation, reducing dependence on prompt-only analysis.
+- Added PDF/text parsing, persisted analysis history, and generated 2-week, 1-month, and 3-month self-improvement roadmaps.
+- Tested document upload, analysis, and offline LLM fallback flows with pytest and FastAPI TestClient.
+

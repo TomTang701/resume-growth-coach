@@ -1,0 +1,17 @@
+Software Engineering Intern
+
+Required qualifications:
+- Build and test backend services using Python.
+- Design REST APIs and persist application data with SQL.
+- Use Git for collaborative development.
+- Write unit tests for API workflows.
+
+Preferred qualifications:
+- Experience with FastAPI, SQLite, SQLAlchemy, or local AI tools.
+- Ability to explain technical tradeoffs and document project setup clearly.
+
+Responsibilities:
+- Implement backend features from product requirements.
+- Collaborate with engineers to test, debug, and improve service reliability.
+- Maintain clear documentation for local development and review.
+

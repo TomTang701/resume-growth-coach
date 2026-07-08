@@ -148,10 +148,17 @@ def analyze_resume_against_job(resume_text: str, job_text: str) -> Deterministic
     resume_skills = extract_skills(resume_text)
     role_skills = infer_role_skills(job_text)
     explicit_job_skills = extract_skills(job_text)
-    job_skills = explicit_job_skills or role_skills
+    use_role_template = should_use_role_template(job_text, role_skills)
+    job_skills = role_skills if use_role_template else explicit_job_skills or role_skills
     resume_keywords = extract_keywords(resume_text)
     job_keywords = extract_keywords(job_text)
-    required_skills = extract_contextual_skills(job_text, REQUIRED_MARKERS) or explicit_job_skills or role_skills or fallback_required_keywords(job_keywords)
+    contextual_required = extract_contextual_skills(job_text, REQUIRED_MARKERS)
+    if contextual_required:
+        required_skills = contextual_required
+    elif use_role_template:
+        required_skills = role_skills
+    else:
+        required_skills = explicit_job_skills or role_skills or fallback_required_keywords(job_keywords)
     preferred_skills = [skill for skill in extract_contextual_skills(job_text, PREFERRED_MARKERS) if skill not in required_skills]
     matched = sorted(set(resume_skills).intersection(job_skills))
     missing = sorted(set(required_skills).difference(resume_skills))
@@ -212,7 +219,7 @@ def infer_role_key(job_text: str) -> str:
     normalized = normalize_for_matching(job_text)
     role_patterns: tuple[tuple[str, tuple[str, ...]], ...] = (
         ("machine_learning_engineer", ("machine learning engineer", "ml engineer", "ai engineer")),
-        ("backend_engineer", ("backend engineer", "back end engineer", "backend developer")),
+        ("backend_engineer", ("backend software engineer", "backend engineer", "back end engineer", "backend developer")),
         ("frontend_engineer", ("frontend engineer", "front end engineer", "frontend developer")),
         ("full_stack_engineer", ("full stack engineer", "fullstack engineer", "full stack developer")),
         ("data_analyst", ("data analyst", "business analyst", "analytics analyst")),
@@ -222,6 +229,14 @@ def infer_role_key(job_text: str) -> str:
         if any(pattern in normalized for pattern in patterns):
             return role
     return ""
+
+
+def should_use_role_template(job_text: str, role_skills: list[str]) -> bool:
+    if not role_skills:
+        return False
+    words = re.findall(r"[a-zA-Z+#.]+", job_text)
+    has_requirement_markers = any(marker in job_text.lower() for marker in REQUIRED_MARKERS + PREFERRED_MARKERS)
+    return len(words) <= 6 and not has_requirement_markers
 
 
 def alias_present(normalized_text: str, alias: str) -> bool:

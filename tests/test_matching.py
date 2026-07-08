@@ -1,5 +1,5 @@
 from app.services.goals import build_growth_goals
-from app.services.matching import analyze_resume_against_job, extract_skills
+from app.services.matching import analyze_resume_against_job, extract_skills, infer_role_title
 
 
 def test_extract_skills_detects_aliases():
@@ -75,3 +75,21 @@ def test_explicit_job_skills_take_priority_over_role_template():
     )
 
     assert "Java" not in result.job_required_skills
+
+
+def test_backend_software_engineer_title_uses_backend_template():
+    resume = """
+    Computer Science student with C++, Python, Java, JavaScript, SQL, C#, TypeScript,
+    Git, Docker, Kubernetes, Node.js, MySQL, PostgreSQL, AWS, Google Cloud, CI/CD,
+    TensorFlow, and PyTorch experience.
+    """
+
+    result = analyze_resume_against_job(resume, "Backend Software Engineer")
+
+    assert infer_role_title("Backend Software Engineer") == "Backend Software Engineer"
+    assert result.fit_score > 50
+    assert "Python" in result.matched_skills
+    assert "Java" in result.matched_skills
+    assert "SQL" in result.matched_skills
+    assert "Docker" in result.matched_skills
+    assert "Backend Development" not in result.missing_skills

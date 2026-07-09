@@ -100,3 +100,31 @@ or:
 .\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30
 .\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30 --delete
 ```
+
+## 2026-07-09 Baseline and Concurrency Verification
+
+### Checked
+
+- Five fixed score golden cases covering minimal input, skills-only input, project evidence, backend matching, and non-engineering keyword overlap.
+- Three concurrent API flows using a file-backed SQLite database.
+- Analysis IDs and result retrieval remained isolated across concurrent requests.
+- Browser executable and Python browser automation availability.
+
+### Results
+
+- Score golden baseline: passed.
+- Concurrent analysis flow: passed.
+- Browser automation: blocked; Playwright, Selenium, and common browser commands are unavailable.
+- Final automated result: `49 passed, no warnings`.
+
+### Remaining Coverage
+
+- SQLite migration/version upgrade rehearsal is still not available.
+- Human-labeled score calibration is still unavailable.
+- The previous Starlette/httpx warning is resolved by the compatible test-client dependency path.
+
+## 2026-07-09 CLI and Dependency Recheck
+
+- `httpx2==2.5.0` installed and dependency files updated.
+- Full regression and quality gate: `49 passed`, no warning.
+- Direct `cleanup_local_data.py --help`: initially failed because of a root-path import issue; fixed and retested successfully.

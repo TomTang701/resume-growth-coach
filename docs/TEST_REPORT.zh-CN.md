@@ -12,7 +12,7 @@
 
 ## 验证证据
 
-- 回归测试：`43 passed, 1 warning`。
+- 回归测试：`49 passed，无 warning`。
 - API quality gate：通过。
 - 真实 `qwen2.5:3b` smoke test：通过。
 - Python 编译检查：上一轮修复中已通过。
@@ -25,6 +25,7 @@
 - analysis、skill matches、growth goals 使用一个事务保存。
 - 删除文档时会删除关联 analysis 记录。
 - 提供默认 dry-run 的按时间清理命令。
+- 已覆盖五组评分 golden cases 和并发 SQLite API 流程。
 - LLM 非英文用户可见字段会安全 fallback。
 - fallback 文档已改为 deterministic fallback，不再描述不存在的第二模型。
 
@@ -36,17 +37,16 @@
 
 ### P1
 
-- 当前环境没有 Playwright/Selenium，无法执行浏览器级端到端测试。
+- 当前环境没有 Playwright/Selenium 和浏览器可执行文件，无法执行浏览器级端到端测试。
 - 仍需要配置浏览器测试 profile，验证真实文件选择、提交、错误恢复和结果渲染。
 
 ### P2
 
 - 尚未实现 SQLite migration 工具，schema 变化仍依赖 `create_all`。
-- 尚未正式测试 SQLite 并发写入和压力行为。
+- 当前只完成三个并发流程 smoke test；高负载 SQLite 写入和压力行为仍未正式测试。
 - 匹配分数没有人工标注数据校准。
-- 测试环境仍有一个 Starlette/httpx 弃用警告。
+- Starlette 测试客户端现在使用兼容的 `httpx2` 开发依赖；当前环境中的原有警告已消除。
 
 ## 下一道质量门禁建议
 
-在宣称生产级之前，应安装浏览器自动化 profile、建立 migration 策略、执行 SQLite 并发测试，并定义标注分数校准数据。在此之前，项目应描述为“经过测试的 local MVP”。
-
+在宣称生产级之前，应安装浏览器自动化 profile、建立 migration 策略、扩展 SQLite 并发压力测试，并定义标注分数校准数据。在此之前，项目应描述为“经过测试的 local MVP”。

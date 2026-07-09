@@ -1,0 +1,32 @@
+[
+  {
+    "name": "minimal",
+    "resume": "Python",
+    "job": "Software Engineer",
+    "expected_score": 26.1
+  },
+  {
+    "name": "skills_only",
+    "resume": "Python Machine Learning TensorFlow PyTorch SQL Git Docker",
+    "job": "Machine Learning Engineer",
+    "expected_score": 73.0
+  },
+  {
+    "name": "project_evidence",
+    "resume": "Python Machine Learning TensorFlow PyTorch SQL Git Docker. Built and deployed a PyTorch machine learning model with Docker.",
+    "job": "Machine Learning Engineer",
+    "expected_score": 80.5
+  },
+  {
+    "name": "backend",
+    "resume": "Built Python FastAPI REST APIs with SQL, Git, pytest, Docker, and database models.",
+    "job": "Backend Software Engineer",
+    "expected_score": 71.2
+  },
+  {
+    "name": "marketing",
+    "resume": "Marketing assistant who planned social media campaigns, maintained content calendars, and reported campaign analytics.",
+    "job": "Marketing coordinator role focused on campaign planning, social media, content calendars, and analytics reporting.",
+    "expected_score": 67.9
+  }
+]

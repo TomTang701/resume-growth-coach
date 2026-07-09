@@ -1,4 +1,5 @@
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 from fastapi.testclient import TestClient
 
@@ -192,6 +193,34 @@ def test_analysis_with_missing_document_returns_not_found(tmp_path):
     response = client.post("/api/analyses", json={"resume_id": 999, "job_description_id": 999})
 
     assert response.status_code == 404
+
+
+def test_concurrent_analysis_requests_are_isolated(tmp_path):
+    client = make_client(tmp_path)
+
+    def run_flow(index: int) -> int:
+        resume = client.post(
+            "/api/documents/resume",
+            data={"text": f"Built Python API project {index} with Git."},
+        )
+        job = client.post(
+            "/api/documents/job-description",
+            data={"text": "Software Engineer requiring Python and Git."},
+        )
+        assert resume.status_code == 200
+        assert job.status_code == 200
+        analysis = client.post(
+            "/api/analyses",
+            json={"resume_id": resume.json()["resume_id"], "job_description_id": job.json()["job_description_id"]},
+        )
+        assert analysis.status_code == 200
+        return analysis.json()["analysis_id"]
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        analysis_ids = list(executor.map(run_flow, range(3)))
+
+    assert len(set(analysis_ids)) == 3
+    assert all(client.get(f"/api/analyses/{analysis_id}").status_code == 200 for analysis_id in analysis_ids)
 
 
 def test_deleting_resume_removes_related_analysis_data(tmp_path):

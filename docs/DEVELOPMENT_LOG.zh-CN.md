@@ -92,7 +92,7 @@
 
 ### 验证结果
 
-- 修复 UTC 时间弃用写法后：`43 passed, 1 warning`。
+- 修复 UTC 时间弃用写法并更新 Starlette 测试客户端依赖后：`49 passed，无 warning`。
 - API quality gate 通过。
 - 真实 Ollama smoke test 仍使用 `qwen2.5:3b` 通过。
 - 当前环境没有安装 Playwright/Selenium，因此未执行浏览器自动化。
@@ -101,10 +101,51 @@
 
 - 浏览器级端到端覆盖仍未完成。
 - SQLite migration、并发/压力测试和分数校准数据仍未完成。
-- Starlette/httpx 弃用警告仍存在，属于外部依赖问题。
+- 当前环境已通过 `httpx2` 依赖更新消除 Starlette/httpx 警告。
 
 ### 未来计划
 
 - **P0**：当前没有已知 P0 问题。
 - **P1**：增加可选 Playwright 测试 profile，并在配置好浏览器的环境执行 smoke test。
 - **P2**：增加 migration 工具、SQLite 并发测试和标注分数校准 fixtures。
+
+## 2026-07-09：基线与并发后续处理
+
+### 修改内容
+
+- 在 `tests/fixtures/score_baseline.json` 增加五组 deterministic score golden cases。
+- 增加三个并发 resume/JD/analysis 请求的真实 API 流程测试。
+- 使用新证据更新专业测试报告和两份语言的测试日志。
+
+### 验证结果
+
+- `49 passed，无 warning`。
+- 五组评分基线均通过，预期分数稳定。
+- 并发 SQLite API 流程通过，analysis ID 独立且结果可读取。
+
+### 仍存在的问题
+
+- 浏览器自动化仍受 Playwright/Selenium 环境缺失阻塞。
+- SQLite schema migration 工具和标注分数校准数据仍未实现。
+- 原有 Starlette/httpx 警告已通过 `httpx2` 依赖更新解决。
+
+### 未来计划
+
+- **P0**：当前没有已知 P0 问题。
+- **P1**：配置 Playwright 并执行浏览器 smoke test。
+- **P2**：增加 migration/version 管理、扩展并发压力测试，并用标注数据替代启发式基线做校准。
+
+## 2026-07-09：测试客户端依赖清理
+
+### 修改内容
+
+- 在 `requirements.txt` 和 `pyproject.toml` 中用兼容的 `httpx2` 开发依赖替代已弃用的 Starlette `httpx` fallback。
+
+### 验证结果
+
+- 更新后的依赖文件代表干净环境安装；当前虚拟环境已安装 `httpx2==2.5.0`。
+- 依赖修改后必须完成全量测试，才能正式关闭该警告。
+
+### 后续发现
+
+- 第一次直接执行 `cleanup_local_data.py --help` 发现根目录导入路径问题；现在 CLI 会在导入 `app` 前加入项目根目录。

@@ -92,7 +92,7 @@ User-facing project output must remain English-only. These internal logs are bil
 
 ### Verification
 
-- `43 passed, 1 warning` after replacing deprecated UTC time handling.
+- `49 passed, no warnings` after replacing deprecated UTC time handling and updating the Starlette test-client dependency.
 - API quality gate passed.
 - Real Ollama smoke test remains passed with `qwen2.5:3b`.
 - Playwright/Selenium browser automation was not run because neither package is installed in this environment.
@@ -101,10 +101,51 @@ User-facing project output must remain English-only. These internal logs are bil
 
 - Browser-level end-to-end coverage remains open.
 - SQLite migration support, concurrency/load testing, and score calibration data remain open.
-- The Starlette/httpx deprecation warning remains external to application logic.
+- No test warning remains in the current environment after installing `httpx2`.
 
 ### Future Work
 
 - **P0**: None currently known.
 - **P1**: Add Playwright as an optional test profile and run browser smoke tests in a configured environment.
 - **P2**: Add migration tooling, concurrent SQLite tests, and labeled score-calibration fixtures.
+
+## 2026-07-09: Baseline and Concurrency Follow-up
+
+### Changes
+
+- Added five deterministic score golden cases in `tests/fixtures/score_baseline.json`.
+- Added a concurrent API flow test covering three simultaneous resume/JD/analysis requests.
+- Updated the professional test report and both language test logs with the new evidence.
+
+### Verification
+
+- `49 passed, no warnings`.
+- Score baseline cases passed with stable expected values.
+- Concurrent SQLite API flow passed with isolated analysis IDs and retrievable results.
+
+### Remaining Problems
+
+- Browser automation remains blocked by the missing Playwright/Selenium environment.
+- SQLite schema migration tooling and labeled score-calibration data are still not implemented.
+- The previous Starlette/httpx warning is resolved by the `httpx2` dependency update.
+
+### Future Work
+
+- **P0**: None currently known.
+- **P1**: Configure Playwright and run browser smoke tests.
+- **P2**: Add migration/version management, expand concurrency load, and replace heuristic baselines with labeled calibration data.
+
+## 2026-07-09: Test Client Dependency Cleanup
+
+### Changes
+
+- Replaced the deprecated Starlette `httpx` fallback with the compatible `httpx2` development dependency in `requirements.txt` and `pyproject.toml`.
+
+### Verification
+
+- A clean-environment dependency install is represented by the updated dependency files; the current virtual environment has `httpx2==2.5.0` installed.
+- A full test run is required after this dependency change before treating the warning as closed.
+
+### Follow-up Finding
+
+- The first direct `cleanup_local_data.py --help` run exposed a root-path import bug; the CLI now inserts the project root before importing `app`.

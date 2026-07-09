@@ -100,3 +100,31 @@
 .\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30
 .\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30 --delete
 ```
+
+## 2026-07-09 基线与并发验证
+
+### 已检查
+
+- 五组固定评分 golden cases，覆盖最小输入、技能清单、项目证据、后端匹配和非工程岗位关键词重叠。
+- 使用文件型 SQLite 的三个并发 API 流程。
+- 并发请求下 analysis ID 和结果读取是否相互隔离。
+- 浏览器可执行文件和 Python 浏览器自动化环境。
+
+### 结果
+
+- 评分 golden baseline：通过。
+- 并发 analysis 流程：通过。
+- 浏览器自动化：阻塞；当前没有 Playwright、Selenium 或常见浏览器命令。
+- 最终自动化结果：`49 passed，无 warning`。
+
+### 剩余覆盖范围
+
+- 尚未执行 SQLite migration/version 升级演练。
+- 尚未获得人工标注评分校准数据。
+- 原有 Starlette/httpx 警告已通过兼容的测试客户端依赖路径解决。
+
+## 2026-07-09 CLI 与依赖复查
+
+- 已安装 `httpx2==2.5.0` 并更新依赖文件。
+- 全量回归和 quality gate：`49 passed`，无 warning。
+- 直接执行 `cleanup_local_data.py --help`：首次因根目录导入路径问题失败；修复后重新验证通过。

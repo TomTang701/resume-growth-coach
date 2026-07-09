@@ -62,6 +62,7 @@ ROLE_SKILL_TEMPLATES: dict[str, tuple[str, ...]] = {
 
 REQUIRED_MARKERS = ("required", "must have", "minimum qualifications", "basic qualifications")
 PREFERRED_MARKERS = ("preferred", "nice to have", "bonus", "plus")
+ROLE_LABEL_SKILLS = {"Backend Development", "Frontend Development"}
 STOPWORDS = {
     "and",
     "are",
@@ -147,7 +148,7 @@ class DeterministicResult:
 def analyze_resume_against_job(resume_text: str, job_text: str) -> DeterministicResult:
     resume_skills = extract_skills(resume_text)
     role_skills = infer_role_skills(job_text)
-    explicit_job_skills = extract_skills(job_text)
+    explicit_job_skills = [skill for skill in extract_skills(job_text) if skill not in ROLE_LABEL_SKILLS]
     use_role_template = should_use_role_template(job_text, role_skills)
     job_skills = role_skills if use_role_template else explicit_job_skills or role_skills
     resume_keywords = extract_keywords(resume_text)

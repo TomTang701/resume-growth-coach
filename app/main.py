@@ -1,5 +1,6 @@
 import json
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse
@@ -24,8 +25,9 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Resume Growth Coach", version="0.1.0", lifespan=lifespan)
-templates = Jinja2Templates(directory="app/templates")
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+APP_DIR = Path(__file__).resolve().parent
+templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
+app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -35,6 +37,11 @@ def home(request: Request) -> HTMLResponse:
         "index.html",
         {"result": None, "error": None, "form_values": {"resume_text": "", "job_description_text": ""}},
     )
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 @app.post("/ui/analyze", response_class=HTMLResponse)
@@ -112,6 +119,8 @@ def get_goals(analysis_id: int, db: Session = Depends(get_db)) -> dict:
 def create_resume(db: Session, content: str, source_type: str, filename: str | None) -> models.Document:
     if not content.strip():
         raise HTTPException(status_code=400, detail="Resume content is required.")
+    if len(content) > 1_000_000:
+        raise HTTPException(status_code=413, detail="Resume content is too large for the local MVP.")
     resume = models.Document(
         source_type=source_type,
         filename=filename,
@@ -127,6 +136,8 @@ def create_resume(db: Session, content: str, source_type: str, filename: str | N
 def create_job_description(db: Session, content: str, source_type: str, filename: str | None) -> models.JobDescription:
     if not content.strip():
         raise HTTPException(status_code=400, detail="Job description content is required.")
+    if len(content) > 1_000_000:
+        raise HTTPException(status_code=413, detail="Job description content is too large for the local MVP.")
     job = models.JobDescription(
         source_type=source_type,
         filename=filename,

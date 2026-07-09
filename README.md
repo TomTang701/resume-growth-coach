@@ -56,6 +56,14 @@ Run tests:
 pytest
 ```
 
+Run the reusable adversarial quality gate:
+
+```powershell
+.\scripts\run-quality-gate.ps1
+```
+
+The quality gate runs the regression suite and API contract checks using a temporary SQLite database and a fake LLM response. It does not require Ollama and does not modify the local application database.
+
 ## User Interface Walkthrough
 
 The screenshots below use sanitized template data only. They do not include a real person's name, contact information, resume, or job application details.

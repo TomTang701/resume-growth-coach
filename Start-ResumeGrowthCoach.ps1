@@ -11,6 +11,23 @@ if (-not (Test-Path -LiteralPath $python)) {
 }
 
 Start-Process -FilePath "cmd.exe" -ArgumentList "/k", "`"$python`" -m uvicorn app.main:app --reload" -WorkingDirectory $PSScriptRoot
-Start-Sleep -Seconds 3
-Start-Process "http://127.0.0.1:8000"
 
+$ready = $false
+for ($attempt = 0; $attempt -lt 30; $attempt++) {
+    try {
+        $response = Invoke-WebRequest -UseBasicParsing -TimeoutSec 1 "http://127.0.0.1:8000/health"
+        if ($response.StatusCode -eq 200) {
+            $ready = $true
+            break
+        }
+    } catch {
+        Start-Sleep -Seconds 1
+    }
+}
+
+if (-not $ready) {
+    Write-Host "The server did not become ready at http://127.0.0.1:8000/health" -ForegroundColor Red
+    exit 1
+}
+
+Start-Process "http://127.0.0.1:8000"

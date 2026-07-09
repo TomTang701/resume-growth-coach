@@ -6,10 +6,13 @@ from fastapi import HTTPException, UploadFile
 
 SUPPORTED_EXTENSIONS = {".txt", ".pdf"}
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+MAX_DOCUMENT_CHARS = 1_000_000
 
 
 async def extract_input_text(text: str | None, file: UploadFile | None) -> tuple[str, str, str | None]:
     if text and text.strip():
+        if len(text) > MAX_DOCUMENT_CHARS:
+            raise HTTPException(status_code=413, detail="Pasted document is too large for the local MVP.")
         return normalize_text(text), "text", None
 
     if file is None or not file.filename:
@@ -50,9 +53,12 @@ def extract_pdf_text(content: bytes) -> str:
         raise HTTPException(status_code=500, detail="PDF parsing dependency is not installed.") from exc
 
     pages: list[str] = []
-    with pdfplumber.open(BytesIO(content)) as pdf:
-        for page in pdf.pages:
-            pages.append(page.extract_text() or "")
+    try:
+        with pdfplumber.open(BytesIO(content)) as pdf:
+            for page in pdf.pages:
+                pages.append(page.extract_text() or "")
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="The PDF could not be parsed.") from exc
     return "\n".join(pages)
 
 
@@ -85,4 +91,3 @@ def detect_resume_sections(text: str) -> list[str]:
     }
     lower = text.lower()
     return [label for label, variants in headings.items() if any(token in lower for token in variants)]
-

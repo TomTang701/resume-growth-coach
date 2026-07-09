@@ -2,14 +2,14 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from app.database import Base, configure_database, engine, init_db
+from app import database
 from app.main import app
 
 
 def make_client(tmp_path: Path) -> TestClient:
-    configure_database(f"sqlite:///{tmp_path / 'test.sqlite3'}")
-    Base.metadata.drop_all(bind=engine)
-    init_db()
+    database.configure_database(f"sqlite:///{tmp_path / 'test.sqlite3'}")
+    database.Base.metadata.drop_all(bind=database.engine)
+    database.init_db()
     return TestClient(app)
 
 
@@ -71,6 +71,15 @@ def test_home_page_renders(tmp_path):
     assert "Resume Growth Coach" in response.text
 
 
+def test_health_endpoint_is_fast_and_stable(tmp_path):
+    client = make_client(tmp_path)
+
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_ui_preserves_submitted_text_and_varies_score(tmp_path):
     client = make_client(tmp_path)
     resume = "Marketing assistant who planned social media campaigns and reported campaign analytics."
@@ -92,3 +101,31 @@ def test_empty_resume_is_rejected(tmp_path):
     response = client.post("/api/documents/resume", data={"text": ""})
 
     assert response.status_code == 400
+
+
+def test_malformed_pdf_returns_client_error_not_server_traceback(tmp_path):
+    client = make_client(tmp_path)
+
+    response = client.post(
+        "/api/documents/resume",
+        files={"file": ("resume.pdf", b"not a PDF", "application/pdf")},
+    )
+
+    assert response.status_code == 400
+    assert "could not be parsed" in response.json()["detail"]
+
+
+def test_oversized_pasted_document_is_rejected(tmp_path):
+    client = make_client(tmp_path)
+
+    response = client.post("/api/documents/resume", data={"text": "x" * 1_000_001})
+
+    assert response.status_code == 413
+
+
+def test_unknown_analysis_returns_not_found(tmp_path):
+    client = make_client(tmp_path)
+
+    response = client.get("/api/analyses/999999")
+
+    assert response.status_code == 404

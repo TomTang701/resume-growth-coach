@@ -4,7 +4,7 @@ import urllib.error
 import urllib.request
 
 from app.services.goals import build_fallback_summary, build_resume_bullets
-from app.services.matching import SKILL_ALIASES, DeterministicResult
+from app.services.matching import SKILL_ALIASES, DeterministicResult, alias_present, normalize_for_matching
 
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
@@ -30,7 +30,11 @@ def generate_llm_analysis(result: DeterministicResult, model_name: str | None = 
         )
         with urllib.request.urlopen(request, timeout=8) as response:
             body = json.loads(response.read().decode("utf-8"))
+        if not isinstance(body, dict):
+            raise ValueError("Ollama response body was not an object.")
         parsed = parse_json_response(body.get("response", ""))
+        if not parsed["summary"]:
+            raise ValueError("Ollama response did not include a summary.")
         parsed["resume_bullet_drafts"] = safe_resume_bullets(result, parsed.get("resume_bullet_drafts", []))
         parsed["model_status"] = "available"
         parsed["model_name"] = model
@@ -73,17 +77,23 @@ def parse_json_response(raw: str) -> dict:
     if start == -1 or end == -1 or end <= start:
         raise ValueError("Ollama response did not include JSON.")
     parsed = json.loads(raw[start : end + 1])
+    if not isinstance(parsed, dict):
+        raise ValueError("Ollama response JSON was not an object.")
     return {
-        "summary": str(parsed.get("summary", "")).strip(),
-        "project_suggestions": [str(item).strip() for item in parsed.get("project_suggestions", []) if str(item).strip()],
-        "resume_bullet_drafts": [str(item).strip() for item in parsed.get("resume_bullet_drafts", []) if str(item).strip()],
+        "summary": parsed.get("summary", "").strip() if isinstance(parsed.get("summary"), str) else "",
+        "project_suggestions": normalize_string_list(parsed.get("project_suggestions")),
+        "resume_bullet_drafts": normalize_string_list(parsed.get("resume_bullet_drafts")),
     }
+
+
+def normalize_string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [item.strip() for item in value if isinstance(item, str) and item.strip()]
 
 
 def safe_resume_bullets(result: DeterministicResult, bullets: list[str]) -> list[str]:
     matched_terms = {skill.lower() for skill in result.matched_skills}
-    missing_terms = {skill.lower() for skill in result.missing_skills}
-    unsupported_skill_terms = {skill.lower() for skill in SKILL_ALIASES if skill not in result.resume_skills}
     evidence_terms = {
         token.lower()
         for evidence in result.matched_project_evidence
@@ -95,12 +105,17 @@ def safe_resume_bullets(result: DeterministicResult, bullets: list[str]) -> list
     safe: list[str] = []
     for bullet in bullets:
         lower = bullet.lower()
-        if any(term and term in lower for term in missing_terms):
+        if any(bullet_mentions_skill(bullet, skill) for skill in result.missing_skills):
             continue
-        if any(term and term in lower for term in unsupported_skill_terms):
+        if any(bullet_mentions_skill(bullet, skill) for skill in SKILL_ALIASES if skill not in result.resume_skills):
             continue
         if allowed_terms and not any(term and term in lower for term in allowed_terms):
             continue
         safe.append(bullet)
 
     return safe or build_resume_bullets(result)
+
+
+def bullet_mentions_skill(bullet: str, skill: str) -> bool:
+    normalized = normalize_for_matching(bullet)
+    return any(alias_present(normalized, alias) for alias in SKILL_ALIASES.get(skill, (skill,)))

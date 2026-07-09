@@ -93,3 +93,12 @@ def test_backend_software_engineer_title_uses_backend_template():
     assert "SQL" in result.matched_skills
     assert "Docker" in result.matched_skills
     assert "Backend Development" not in result.missing_skills
+
+
+def test_role_labels_are_not_counted_as_hard_skill_gaps_in_long_jd():
+    result = analyze_resume_against_job(
+        "Python FastAPI SQL Git Docker",
+        "We are hiring a Backend Software Engineer. Build APIs using Python and SQL.",
+    )
+
+    assert "Backend Development" not in result.missing_skills

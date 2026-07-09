@@ -3,11 +3,14 @@ from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import NullPool, StaticPool
 
 
 Base = declarative_base()
 
-DEFAULT_DATABASE_URL = "sqlite:///./local_data/resume_growth_coach.sqlite3"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_DATABASE_PATH = PROJECT_ROOT / "local_data" / "resume_growth_coach.sqlite3"
+DEFAULT_DATABASE_URL = f"sqlite:///{DEFAULT_DATABASE_PATH.as_posix()}"
 
 
 def _ensure_sqlite_parent(database_url: str) -> None:
@@ -21,8 +24,12 @@ def _ensure_sqlite_parent(database_url: str) -> None:
 
 def _make_engine(database_url: str):
     _ensure_sqlite_parent(database_url)
-    connect_args = {"check_same_thread": False} if database_url.startswith("sqlite") else {}
-    return create_engine(database_url, connect_args=connect_args)
+    if not database_url.startswith("sqlite"):
+        return create_engine(database_url)
+    connect_args = {"check_same_thread": False}
+    if database_url.endswith(":memory:"):
+        return create_engine(database_url, connect_args=connect_args, poolclass=StaticPool)
+    return create_engine(database_url, connect_args=connect_args, poolclass=NullPool)
 
 
 DATABASE_URL = os.getenv("RGC_DATABASE_URL", DEFAULT_DATABASE_URL)
@@ -32,6 +39,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def configure_database(database_url: str) -> None:
     global DATABASE_URL, engine, SessionLocal
+    engine.dispose()
     DATABASE_URL = database_url
     engine = _make_engine(database_url)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -49,4 +57,3 @@ def get_db():
         yield db
     finally:
         db.close()
-

@@ -93,9 +93,28 @@ def run_api_contract_checks() -> dict[str, object]:
                     data={"text": "x" * 1_000_001},
                 )
                 assert oversized.status_code == 413
-                checks["oversized_input"] = "passed"
+                oversized_job = client.post(
+                    "/api/documents/job-description",
+                    data={"text": "x" * 1_000_001},
+                )
+                assert oversized_job.status_code == 413
+                checks["input_limits"] = "passed"
+
+                unsafe_ui = client.post(
+                    "/ui/analyze",
+                    data={"resume_text": "<script>alert('x')</script>", "job_description_text": ""},
+                )
+                assert unsafe_ui.status_code == 200
+                assert "<script>alert('x')</script>" not in unsafe_ui.text
+                assert "Job description content is required." in unsafe_ui.text
+                checks["ui_validation_and_escaping"] = "passed"
 
                 assert client.get("/api/analyses/999999").status_code == 404
+                missing_analysis = client.post(
+                    "/api/analyses",
+                    json={"resume_id": 999999, "job_description_id": 999999},
+                )
+                assert missing_analysis.status_code == 404
                 checks["not_found"] = "passed"
         finally:
             main.generate_llm_analysis = original_llm

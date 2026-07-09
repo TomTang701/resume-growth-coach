@@ -470,3 +470,15 @@ codex
 - Implemented deterministic skill matching and gap scoring before LLM generation, reducing dependence on prompt-only analysis.
 - Added PDF/text parsing, persisted analysis history, and generated 2-week, 1-month, and 3-month self-improvement roadmaps.
 - Tested document upload, analysis, and offline LLM fallback flows with pytest and FastAPI TestClient.
+
+## 16. 开发交接与测试日志规范
+
+项目维护必须同时更新以下文件：
+
+- `docs/DEVELOPMENT_LOG.md`：记录较大修改、验证结果、遗留问题和按 P0/P1/P2 排序的未来计划。
+- `docs/TEST_LOG.md`：记录刁钻测试检查范围、可疑点、使用感受、极端情况和未覆盖范围。
+- `docs/HANDOFF.md`：记录接手步骤、日志模板和提交前完成条件。
+
+出现 bug 时，先在 `tests/` 或 `tools/quality_gate.py` 中添加能复现问题的自动化测试，再修改实现；测试必须保留为回归保护。评分、解析、推荐岗位、持久化和 API contract 的修改属于大修改，不能只更新日志而不更新测试。
+
+日志可以中文优先，面向用户的项目成果仍必须遵守本规范第 1 节的纯英文要求。

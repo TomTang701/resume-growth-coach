@@ -97,3 +97,29 @@ def test_ollama_timeout_configuration_is_bounded(monkeypatch):
 
     monkeypatch.setenv("RGC_OLLAMA_TIMEOUT_SECONDS", "0")
     assert get_ollama_timeout_seconds() == 1.0
+
+
+def test_ollama_timeout_is_read_when_request_is_made(monkeypatch):
+    result = analyze_resume_against_job("Python", "Software Engineer")
+    captured = {}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return False
+
+        def read(self):
+            return b'{"response":"{\\"summary\\":\\"Ready\\"}"}'
+
+    def fake_urlopen(_request, timeout):
+        captured["timeout"] = timeout
+        return Response()
+
+    monkeypatch.setenv("RGC_OLLAMA_TIMEOUT_SECONDS", "17")
+    monkeypatch.setattr("app.services.ollama.urllib.request.urlopen", fake_urlopen)
+
+    generate_llm_analysis(result)
+
+    assert captured["timeout"] == 17.0

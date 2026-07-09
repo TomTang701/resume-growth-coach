@@ -130,3 +130,49 @@ def test_unknown_analysis_returns_not_found(tmp_path):
     response = client.get("/api/analyses/999999")
 
     assert response.status_code == 404
+
+
+def test_ui_validation_error_preserves_inputs_and_escapes_html(tmp_path):
+    client = make_client(tmp_path)
+    response = client.post(
+        "/ui/analyze",
+        data={"resume_text": "Candidate <script>alert('x')</script>", "job_description_text": ""},
+    )
+
+    assert response.status_code == 200
+    assert "Job description content is required." in response.text
+    assert "&lt;script&gt;alert(&#39;x&#39;)&lt;/script&gt;" in response.text
+    assert "<script>alert('x')</script>" not in response.text
+
+
+def test_unsupported_upload_and_empty_file_are_rejected(tmp_path):
+    client = make_client(tmp_path)
+    unsupported = client.post(
+        "/api/documents/resume",
+        files={"file": ("resume.docx", b"content", "application/octet-stream")},
+    )
+    empty = client.post(
+        "/api/documents/resume",
+        files={"file": ("resume.txt", b"", "text/plain")},
+    )
+
+    assert unsupported.status_code == 400
+    assert "Only .txt and .pdf" in unsupported.json()["detail"]
+    assert empty.status_code == 400
+    assert "empty" in empty.json()["detail"]
+
+
+def test_oversized_job_description_is_rejected(tmp_path):
+    client = make_client(tmp_path)
+
+    response = client.post("/api/documents/job-description", data={"text": "x" * 1_000_001})
+
+    assert response.status_code == 413
+
+
+def test_analysis_with_missing_document_returns_not_found(tmp_path):
+    client = make_client(tmp_path)
+
+    response = client.post("/api/analyses", json={"resume_id": 999, "job_description_id": 999})
+
+    assert response.status_code == 404

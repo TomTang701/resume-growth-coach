@@ -70,3 +70,33 @@
 - 验证 Ollama 非英文用户可见输出会安全 fallback。
 - 验证真实 `qwen2.5:3b` smoke test 通过。
 - 最终自动化结果：`41 passed, 1 warning`。
+
+## 2026-07-09 数据保留与稳定性后续验证
+
+### 已检查
+
+- dry-run 清理会报告过期 resume、JD 和关联 analysis，但不会删除。
+- 显式清理会删除过期文档及其 analysis、skill matches、growth goals。
+- 非法保留天数会被拒绝。
+- 清理功能加入后，全量回归和 API quality gate 仍然通过。
+- 已检查浏览器工具环境；当前没有安装 Playwright 和 Selenium。
+
+### 结果
+
+- 数据保留清理：通过。
+- 关联记录清理：通过。
+- 破坏性操作必须显式使用 `--delete`：通过命令设计和单元测试验证。
+- 最终自动化结果：`43 passed, 1 warning`。
+
+### 剩余覆盖范围
+
+- 因浏览器自动化依赖不可用，未执行浏览器点击级测试。
+- 未执行 SQLite 并发压力测试和 migration 演练。
+- 仍没有基于人工标注录用结果的分数校准数据。
+
+### 复现命令
+
+```powershell
+.\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30
+.\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30 --delete
+```

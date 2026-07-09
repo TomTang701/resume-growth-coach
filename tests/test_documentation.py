@@ -9,6 +9,7 @@ def test_bilingual_handoff_documents_have_required_pairs_and_sections():
         ("DEVELOPMENT_LOG.md", "DEVELOPMENT_LOG.zh-CN.md", "Development Log", "开发日志"),
         ("TEST_LOG.md", "TEST_LOG.zh-CN.md", "Adversarial Test Log", "刁钻测试日志"),
         ("HANDOFF.md", "HANDOFF.zh-CN.md", "Developer Handoff", "开发交接"),
+        ("TEST_REPORT.md", "TEST_REPORT.zh-CN.md", "Professional Test Report", "专业测试报告"),
     )
 
     for english_name, chinese_name, english_heading, chinese_heading in pairs:

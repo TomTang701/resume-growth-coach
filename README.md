@@ -79,6 +79,7 @@ English is the default documentation language. Each handoff and log document has
 - [Developer Handoff](docs/HANDOFF.md) | [中文交接](docs/HANDOFF.zh-CN.md)
 - [Development Log](docs/DEVELOPMENT_LOG.md) | [中文开发日志](docs/DEVELOPMENT_LOG.zh-CN.md)
 - [Adversarial Test Log](docs/TEST_LOG.md) | [中文测试日志](docs/TEST_LOG.zh-CN.md)
+- [Professional Test Report](docs/TEST_REPORT.md) | [中文测试报告](docs/TEST_REPORT.zh-CN.md)
 
 The English file is the default entry point. Update the English document first and commit the matching `.zh-CN.md` translation in the same change.
 
@@ -134,6 +135,18 @@ The default local-model request timeout is 60 seconds. Override it when needed w
 ## Privacy Notes
 
 Documents are stored locally until explicitly deleted through the document deletion API. Do not commit real resumes, real job descriptions, local databases, upload folders, or `.env` files. Use only sanitized sample data in public repositories.
+
+Inspect old local data without deleting it:
+
+```powershell
+.\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30
+```
+
+Delete the matching local data only after reviewing the dry-run result:
+
+```powershell
+.\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30 --delete
+```
 
 ## Sample Resume Bullets
 

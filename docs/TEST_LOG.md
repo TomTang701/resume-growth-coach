@@ -70,3 +70,33 @@ or:
 - Verified non-English Ollama user-facing output falls back safely.
 - Verified the real `qwen2.5:3b` smoke test passes.
 - Final automated result: `41 passed, 1 warning`.
+
+## 2026-07-09 Retention and Stability Follow-up
+
+### Checked
+
+- Dry-run retention cleanup reports old resumes, job descriptions, and dependent analyses without deleting them.
+- Explicit cleanup removes old documents and their analyses, skill matches, and growth goals.
+- Invalid retention windows are rejected.
+- The full regression suite and API quality gate remain green after the cleanup feature.
+- Browser tooling availability was checked; Playwright and Selenium are not installed.
+
+### Results
+
+- Retention cleanup: passed.
+- Dependent-record cleanup: passed.
+- Destructive action requires explicit `--delete`: passed by command design and unit coverage.
+- Final automated result: `43 passed, 1 warning`.
+
+### Remaining Coverage
+
+- No browser click-level test was executed because the browser automation dependencies are unavailable.
+- No concurrent SQLite load test or migration rehearsal was executed.
+- Score calibration against human-labeled hiring outcomes remains unavailable.
+
+### Reproduction Commands
+
+```powershell
+.\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30
+.\.venv\Scripts\python.exe tools\cleanup_local_data.py --older-than-days 30 --delete
+```

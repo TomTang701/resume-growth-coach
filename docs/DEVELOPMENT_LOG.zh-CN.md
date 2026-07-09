@@ -80,3 +80,31 @@
 - **P0**：当前没有已知 P0 问题。
 - **P1**：加入 Playwright 浏览器覆盖，以及本地数据保留/清理命令。
 - **P2**：加入 SQLite migration、并发测试和分数校准数据。
+
+## 2026-07-09：数据保留清理后续处理
+
+### 修改内容
+
+- 增加 `app/services/retention.py`，支持按时间清理文档及关联记录。
+- 增加 `tools/cleanup_local_data.py`；默认只 dry-run，必须显式使用 `--delete` 才会删除。
+- 增加 dry-run 数量、关联 analysis 删除和非法保留天数的回归测试。
+- 更新 README 以及测试/报告文档。
+
+### 验证结果
+
+- 修复 UTC 时间弃用写法后：`43 passed, 1 warning`。
+- API quality gate 通过。
+- 真实 Ollama smoke test 仍使用 `qwen2.5:3b` 通过。
+- 当前环境没有安装 Playwright/Selenium，因此未执行浏览器自动化。
+
+### 仍存在的问题
+
+- 浏览器级端到端覆盖仍未完成。
+- SQLite migration、并发/压力测试和分数校准数据仍未完成。
+- Starlette/httpx 弃用警告仍存在，属于外部依赖问题。
+
+### 未来计划
+
+- **P0**：当前没有已知 P0 问题。
+- **P1**：增加可选 Playwright 测试 profile，并在配置好浏览器的环境执行 smoke test。
+- **P2**：增加 migration 工具、SQLite 并发测试和标注分数校准 fixtures。

@@ -80,3 +80,31 @@ User-facing project output must remain English-only. These internal logs are bil
 - **P0**: None currently known.
 - **P1**: Add Playwright browser coverage and a local data retention/cleanup command.
 - **P2**: Add SQLite migration support, concurrency tests, and score calibration data.
+
+## 2026-07-09: Retention Cleanup Follow-up
+
+### Changes
+
+- Added `app/services/retention.py` for age-based document and dependent-record cleanup.
+- Added `tools/cleanup_local_data.py`; it is dry-run by default and requires `--delete` for destructive cleanup.
+- Added retention regression tests for dry-run counts, dependent analysis deletion, and invalid retention windows.
+- Added README instructions and updated the test/report documentation.
+
+### Verification
+
+- `43 passed, 1 warning` after replacing deprecated UTC time handling.
+- API quality gate passed.
+- Real Ollama smoke test remains passed with `qwen2.5:3b`.
+- Playwright/Selenium browser automation was not run because neither package is installed in this environment.
+
+### Remaining Problems
+
+- Browser-level end-to-end coverage remains open.
+- SQLite migration support, concurrency/load testing, and score calibration data remain open.
+- The Starlette/httpx deprecation warning remains external to application logic.
+
+### Future Work
+
+- **P0**: None currently known.
+- **P1**: Add Playwright as an optional test profile and run browser smoke tests in a configured environment.
+- **P2**: Add migration tooling, concurrent SQLite tests, and labeled score-calibration fixtures.

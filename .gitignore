@@ -11,7 +11,8 @@ __pycache__/
 uploads/
 local_data/
 real_samples/
+PROJECT_SPEC.md
+RESUME_GROWTH_COACH_PLAN.md
 dist/
 build/
 *.egg-info/
-

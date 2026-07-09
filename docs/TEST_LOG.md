@@ -123,6 +123,31 @@ or:
 - Human-labeled score calibration is still unavailable.
 - The previous Starlette/httpx warning is resolved by the compatible test-client dependency path.
 
+## 2026-07-09 Browser and Schema Verification
+
+### Checked
+
+- Real headless Chromium page load and title.
+- Text-only analysis through the actual form.
+- Validation error recovery with preserved page state.
+- File-only resume and job-description submission through the actual browser controls.
+- Local schema version marker and required table/column validation.
+- Twelve concurrent file-backed SQLite API flows.
+
+### Results
+
+- Chromium browser smoke: passed.
+- Schema validation: passed, version `1`.
+- Twelve-flow concurrency smoke: passed.
+- Full regression: `49 passed`, no warnings.
+
+### Remaining Coverage
+
+- Firefox/WebKit and cross-browser behavior are not tested.
+- The browser smoke is not yet running in CI.
+- Schema version protection exists, but historical migration scripts do not.
+- High-volume load and human-labeled score calibration remain open.
+
 ## 2026-07-09 CLI and Dependency Recheck
 
 - `httpx2==2.5.0` installed and dependency files updated.

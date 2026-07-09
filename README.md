@@ -72,6 +72,19 @@ Run the real local-model smoke test when Ollama is installed:
 .\scripts\run-ollama-smoke-test.ps1
 ```
 
+Install the Chromium browser once, then run the real UI smoke test:
+
+```powershell
+python -m playwright install chromium
+.\.venv\Scripts\python.exe tools\browser_smoke.py
+```
+
+Validate the local database schema and version marker:
+
+```powershell
+.\.venv\Scripts\python.exe tools\check_database_schema.py
+```
+
 ## Developer Documentation
 
 English is the default documentation language. Each handoff and log document has a separate Chinese counterpart for reference:

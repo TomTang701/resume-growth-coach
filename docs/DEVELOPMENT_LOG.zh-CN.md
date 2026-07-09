@@ -149,3 +149,33 @@
 ### 后续发现
 
 - 第一次直接执行 `cleanup_local_data.py --help` 发现根目录导入路径问题；现在 CLI 会在导入 `app` 前加入项目根目录。
+
+## 2026-07-09：浏览器与 Schema 保护后续处理
+
+### 修改内容
+
+- 增加 Playwright/Chromium `tools/browser_smoke.py`，覆盖页面加载、文本分析、校验恢复和文件上传。
+- 在 `app/database.py` 增加 schema version marker 以及必需表/列校验。
+- 增加 `tools/check_database_schema.py`，可显式检查本地数据库。
+- 将并发 API smoke test 从 3 路扩展到 12 路。
+- 将 Playwright 加入开发依赖并记录新命令。
+
+### 验证结果
+
+- 浏览器 smoke test 通过。
+- 数据库 schema 校验通过，`version=1`。
+- `49 passed`，无 warning。
+- API quality gate 通过。
+
+### 仍存在的问题
+
+- schema marker 是保护机制，不是完整的历史 migration 系统；未来 schema 变化仍需要升级脚本。
+- 浏览器测试目前只覆盖 Chromium，尚未形成跨浏览器或 CI 矩阵。
+- 12 路并发只是 smoke test，不是高负载压力测试。
+- 仍没有人工标注的分数校准数据。
+
+### 未来计划
+
+- **P0**：当前没有已知 P0 问题。
+- **P1**：增加 migration 脚本，并在 CI 执行浏览器 smoke test。
+- **P2**：增加 Firefox/WebKit 覆盖、高负载测试和标注分数校准。

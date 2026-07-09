@@ -149,3 +149,33 @@ User-facing project output must remain English-only. These internal logs are bil
 ### Follow-up Finding
 
 - The first direct `cleanup_local_data.py --help` run exposed a root-path import bug; the CLI now inserts the project root before importing `app`.
+
+## 2026-07-09: Browser and Schema Protection Follow-up
+
+### Changes
+
+- Added Playwright/Chromium `tools/browser_smoke.py` coverage for page load, text analysis, validation recovery, and file upload.
+- Added schema version marker and required table/column validation in `app/database.py`.
+- Added `tools/check_database_schema.py` for explicit local database checks.
+- Expanded the concurrent API smoke test from 3 to 12 flows.
+- Added Playwright to the development dependencies and documented the new commands.
+
+### Verification
+
+- Browser smoke test passed.
+- Database schema validation passed with `version=1`.
+- `49 passed`, no warnings.
+- API quality gate passed.
+
+### Remaining Problems
+
+- The schema marker is protection, not a full historical migration system; upgrade scripts are still needed for future schema changes.
+- The browser test covers Chromium only and is not yet a cross-browser or CI matrix.
+- Twelve concurrent flows are a smoke test, not a high-volume load test.
+- Human-labeled score calibration data is still unavailable.
+
+### Future Work
+
+- **P0**: None currently known.
+- **P1**: Add migration scripts and run the browser smoke test in CI.
+- **P2**: Add Firefox/WebKit coverage, high-volume load tests, and labeled score calibration.

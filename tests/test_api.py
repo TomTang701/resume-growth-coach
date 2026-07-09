@@ -216,10 +216,10 @@ def test_concurrent_analysis_requests_are_isolated(tmp_path):
         assert analysis.status_code == 200
         return analysis.json()["analysis_id"]
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        analysis_ids = list(executor.map(run_flow, range(3)))
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        analysis_ids = list(executor.map(run_flow, range(12)))
 
-    assert len(set(analysis_ids)) == 3
+    assert len(set(analysis_ids)) == 12
     assert all(client.get(f"/api/analyses/{analysis_id}").status_code == 200 for analysis_id in analysis_ids)
 
 

@@ -123,6 +123,31 @@
 - 尚未获得人工标注评分校准数据。
 - 原有 Starlette/httpx 警告已通过兼容的测试客户端依赖路径解决。
 
+## 2026-07-09 浏览器与 Schema 验证
+
+### 已检查
+
+- 真实无头 Chromium 页面加载和 title。
+- 通过真实表单提交文本分析。
+- 校验失败恢复以及页面状态保留。
+- 通过真实浏览器控件只上传 resume 和 JD 文件。
+- 本地 schema version marker 和必需表/列校验。
+- 12 路文件型 SQLite 并发 API 流程。
+
+### 结果
+
+- Chromium 浏览器 smoke：通过。
+- Schema 校验：通过，版本 `1`。
+- 12 路并发 smoke：通过。
+- 全量回归：`49 passed`，无 warning。
+
+### 剩余覆盖范围
+
+- 尚未测试 Firefox/WebKit 和跨浏览器行为。
+- 浏览器 smoke 尚未加入 CI。
+- 已有 schema version 保护，但还没有历史 migration 脚本。
+- 高负载压力测试和人工标注分数校准仍未完成。
+
 ## 2026-07-09 CLI 与依赖复查
 
 - 已安装 `httpx2==2.5.0` 并更新依赖文件。

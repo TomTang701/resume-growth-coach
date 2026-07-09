@@ -81,6 +81,21 @@ def run_api_contract_checks() -> dict[str, object]:
                 assert all(item["title"] != "Backend Software Engineer" for item in body["recommended_matching_jobs"])
                 checks["analysis_and_recommendations"] = "passed"
 
+                file_ui = client.post(
+                    "/ui/analyze",
+                    files={
+                        "resume_file": ("resume.txt", b"Built Python APIs with Git.", "text/plain"),
+                        "job_description_file": ("job.txt", b"Software Engineer requiring Python and Git.", "text/plain"),
+                    },
+                )
+                assert file_ui.status_code == 200 and "Target JD fit score" in file_ui.text
+                checks["ui_file_upload"] = "passed"
+
+                deleted = client.delete(f"/api/documents/resume/{resume.json()['resume_id']}")
+                assert deleted.status_code == 200
+                assert client.get(f"/api/analyses/{analysis.json()['analysis_id']}").status_code == 404
+                checks["document_cleanup"] = "passed"
+
                 malformed_pdf = client.post(
                     "/api/documents/resume",
                     files={"file": ("broken.pdf", b"not a PDF", "application/pdf")},

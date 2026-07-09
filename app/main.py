@@ -49,12 +49,20 @@ async def analyze_from_ui(
     request: Request,
     resume_text: str = Form(""),
     job_description_text: str = Form(""),
+    resume_file: UploadFile | None = File(None),
+    job_description_file: UploadFile | None = File(None),
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
     form_values = {"resume_text": resume_text, "job_description_text": job_description_text}
     try:
-        resume = create_resume(db, resume_text, "text", None)
-        job = create_job_description(db, job_description_text, "text", None)
+        if not resume_text.strip() and not (resume_file and resume_file.filename):
+            raise HTTPException(status_code=400, detail="Resume content is required.")
+        if not job_description_text.strip() and not (job_description_file and job_description_file.filename):
+            raise HTTPException(status_code=400, detail="Job description content is required.")
+        resume_content, resume_source, resume_filename = await extract_input_text(resume_text, resume_file)
+        job_content, job_source, job_filename = await extract_input_text(job_description_text, job_description_file)
+        resume = create_resume(db, resume_content, resume_source, resume_filename)
+        job = create_job_description(db, job_content, job_source, job_filename)
         analysis = run_analysis(db, resume.id, job.id, None)
         result = build_analysis_payload(db, analysis)
         return templates.TemplateResponse(request, "index.html", {"result": result, "error": None, "form_values": form_values})
@@ -90,6 +98,16 @@ async def upload_job_description(
         extracted_text_preview=preview_text(job.content),
         detected_role_keywords=json.loads(job.detected_keywords_json),
     )
+
+
+@app.delete("/api/documents/resume/{resume_id}")
+def delete_resume(resume_id: int, db: Session = Depends(get_db)) -> dict[str, object]:
+    return delete_document_and_analyses(db, models.Document, resume_id, "Resume")
+
+
+@app.delete("/api/documents/job-description/{job_description_id}")
+def delete_job_description(job_description_id: int, db: Session = Depends(get_db)) -> dict[str, object]:
+    return delete_document_and_analyses(db, models.JobDescription, job_description_id, "Job description")
 
 
 @app.post("/api/analyses", response_model=AnalysisCreateResponse)
@@ -178,8 +196,7 @@ def run_analysis(db: Session, resume_id: int, job_description_id: int, model_nam
         ),
     )
     db.add(analysis)
-    db.commit()
-    db.refresh(analysis)
+    db.flush()
 
     for skill in deterministic.matched_skills:
         db.add(models.SkillMatch(analysis_id=analysis.id, match_type="matched", skill=skill))
@@ -187,8 +204,35 @@ def run_analysis(db: Session, resume_id: int, job_description_id: int, model_nam
         db.add(models.SkillMatch(analysis_id=analysis.id, match_type="missing", skill=skill))
     for horizon, items in goals.items():
         db.add(models.GrowthGoal(analysis_id=analysis.id, horizon=horizon, goals_json=json.dumps(items)))
-    db.commit()
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    db.refresh(analysis)
     return analysis
+
+
+def delete_document_and_analyses(
+    db: Session,
+    document_model: type[models.Document] | type[models.JobDescription],
+    document_id: int,
+    label: str,
+) -> dict[str, object]:
+    document = db.get(document_model, document_id)
+    if document is None:
+        raise HTTPException(status_code=404, detail=f"{label} was not found.")
+
+    filter_column = models.Analysis.resume_id if document_model is models.Document else models.Analysis.job_description_id
+    analyses = db.query(models.Analysis).filter(filter_column == document_id).all()
+    analysis_ids = [analysis.id for analysis in analyses]
+    if analysis_ids:
+        db.query(models.SkillMatch).filter(models.SkillMatch.analysis_id.in_(analysis_ids)).delete(synchronize_session=False)
+        db.query(models.GrowthGoal).filter(models.GrowthGoal.analysis_id.in_(analysis_ids)).delete(synchronize_session=False)
+        db.query(models.Analysis).filter(models.Analysis.id.in_(analysis_ids)).delete(synchronize_session=False)
+    db.delete(document)
+    db.commit()
+    return {"deleted": True, "document_id": document_id, "deleted_analysis_count": len(analysis_ids)}
 
 
 def fetch_analysis(db: Session, analysis_id: int) -> models.Analysis:

@@ -52,3 +52,31 @@
 - 提交前运行 `scripts/run-quality-gate.ps1`。
 - 不要提交真实简历、真实 JD、`local_data/` 或 `.env` 文件。
 
+## 2026-07-09：P1 测试问题修复
+
+### 修改内容
+
+- 网页新增可选的 resume 和 job description 文件上传。
+- 将无上限文件读取改为分块读取，并限制在配置的 5 MB 上限内。
+- 将 analysis、skill matches 和 growth goals 改为一次事务提交。
+- 增加文档删除接口，同时删除关联的 analysis、matches 和 goals。
+- 增加明确的 `scripts/run-ollama-smoke-test.ps1`，并修复 PowerShell 成功状态判断。
+- 拒绝 Ollama 用户可见字段中的中文文本，确保 fallback 输出保持英文。
+- 更新 README 和本地规范，明确 fallback 是 deterministic fallback，而不是第二个模型。
+
+### 验证结果
+
+- `41 passed, 1 warning`。
+- API quality gate 通过。
+- 真实 `qwen2.5:3b` smoke test 通过。
+
+### 仍存在的问题
+
+- 尚未实现浏览器级端到端测试、并发测试和生产级数据加密。
+- 依赖弃用警告仍然存在。
+
+### 未来计划
+
+- **P0**：当前没有已知 P0 问题。
+- **P1**：加入 Playwright 浏览器覆盖，以及本地数据保留/清理命令。
+- **P2**：加入 SQLite migration、并发测试和分数校准数据。

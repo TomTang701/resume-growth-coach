@@ -61,3 +61,12 @@ or:
 ```powershell
 .\.venv\Scripts\python.exe tools\quality_gate.py
 ```
+
+## 2026-07-09 P1 Remediation Verification
+
+- Verified UI file-only submission for both resume and job description.
+- Verified oversized uploads are rejected after bounded chunked reading.
+- Verified deleting a resume removes its related analysis records.
+- Verified non-English Ollama user-facing output falls back safely.
+- Verified the real `qwen2.5:3b` smoke test passes.
+- Final automated result: `41 passed, 1 warning`.

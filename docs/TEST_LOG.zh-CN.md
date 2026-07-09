@@ -62,3 +62,11 @@
 .\.venv\Scripts\python.exe tools\quality_gate.py
 ```
 
+## 2026-07-09 P1 修复验证
+
+- 验证网页只上传 resume 和 job description 文件即可提交。
+- 验证超大文件经过有上限的分块读取后被拒绝。
+- 验证删除 resume 会同时删除关联 analysis 记录。
+- 验证 Ollama 非英文用户可见输出会安全 fallback。
+- 验证真实 `qwen2.5:3b` smoke test 通过。
+- 最终自动化结果：`41 passed, 1 warning`。

@@ -14,12 +14,16 @@
             <p class="eyebrow">Local-first resume analysis</p>
             <h1>Resume Growth Coach</h1>
           </div>
-          <form action="/ui/analyze" method="post" class="analysis-form">
+          <form action="/ui/analyze" method="post" enctype="multipart/form-data" class="analysis-form">
             <label for="resume_text">Resume text</label>
-            <textarea id="resume_text" name="resume_text" required placeholder="Paste a sanitized resume here.">{{ form_values.resume_text }}</textarea>
+            <textarea id="resume_text" name="resume_text" placeholder="Paste a sanitized resume here.">{{ form_values.resume_text }}</textarea>
+            <label for="resume_file">Or upload resume (.txt or .pdf)</label>
+            <input id="resume_file" name="resume_file" type="file" accept=".txt,.pdf">
 
             <label for="job_description_text">Job description</label>
-            <textarea id="job_description_text" name="job_description_text" required placeholder="Paste a target job description here.">{{ form_values.job_description_text }}</textarea>
+            <textarea id="job_description_text" name="job_description_text" placeholder="Paste a target job description here.">{{ form_values.job_description_text }}</textarea>
+            <label for="job_description_file">Or upload job description (.txt or .pdf)</label>
+            <input id="job_description_file" name="job_description_file" type="file" accept=".txt,.pdf">
 
             <button type="submit">Run analysis</button>
           </form>

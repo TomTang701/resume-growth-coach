@@ -1,6 +1,7 @@
 import json
 import http.client
 import os
+import re
 import urllib.error
 import urllib.request
 
@@ -88,11 +89,18 @@ def parse_json_response(raw: str) -> dict:
     parsed = json.loads(raw[start : end + 1])
     if not isinstance(parsed, dict):
         raise ValueError("Ollama response JSON was not an object.")
-    return {
+    normalized = {
         "summary": parsed.get("summary", "").strip() if isinstance(parsed.get("summary"), str) else "",
         "project_suggestions": normalize_string_list(parsed.get("project_suggestions")),
         "resume_bullet_drafts": normalize_string_list(parsed.get("resume_bullet_drafts")),
     }
+    if any(contains_cjk(value) for value in [normalized["summary"], *normalized["project_suggestions"], *normalized["resume_bullet_drafts"]]):
+        raise ValueError("Ollama response contained non-English user-facing text.")
+    return normalized
+
+
+def contains_cjk(value: str) -> bool:
+    return re.search(r"[\u3400-\u4dbf\u4e00-\u9fff]", value) is not None
 
 
 def normalize_string_list(value: object) -> list[str]:

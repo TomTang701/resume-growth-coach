@@ -30,6 +30,17 @@ def test_ollama_non_list_fields_are_ignored():
     assert parsed == {"summary": "Ready", "project_suggestions": [], "resume_bullet_drafts": []}
 
 
+def test_ollama_non_english_user_facing_text_is_rejected():
+    parsed = '{"summary": "很好的匹配", "project_suggestions": [], "resume_bullet_drafts": []}'
+
+    try:
+        parse_json_response(parsed)
+    except ValueError as exc:
+        assert "non-English" in str(exc)
+    else:
+        raise AssertionError("Expected non-English model output to be rejected")
+
+
 def test_bullet_filter_does_not_confuse_javascript_with_java():
     result = analyze_resume_against_job(
         "Built JavaScript frontend features with React, HTML, CSS, and Git.",

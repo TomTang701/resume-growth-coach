@@ -8,7 +8,7 @@ The project runs deterministic analysis before any LLM generation. Ollama is opt
 
 - FastAPI backend with JSON APIs and a local HTML UI
 - SQLite persistence through SQLAlchemy
-- Pasted text and `.txt` / `.pdf` document input
+- Pasted text and `.txt` / `.pdf` document input in both the API and local UI
 - Deterministic skill matching and explainable fit scoring
 - Evidence-aware fit scoring that distinguishes listed skills from project evidence
 - Optional Ollama summaries with offline fallback
@@ -66,6 +66,12 @@ Run the reusable adversarial quality gate:
 
 The quality gate runs the regression suite and API contract checks using a temporary SQLite database and a fake LLM response. It does not require Ollama and does not modify the local application database.
 
+Run the real local-model smoke test when Ollama is installed:
+
+```powershell
+.\scripts\run-ollama-smoke-test.ps1
+```
+
 ## Developer Documentation
 
 English is the default documentation language. Each handoff and log document has a separate Chinese counterpart for reference:
@@ -122,10 +128,12 @@ The default local-model request timeout is 60 seconds. Override it when needed w
 - `POST /api/analyses`
 - `GET /api/analyses/{analysis_id}`
 - `GET /api/goals/{analysis_id}`
+- `DELETE /api/documents/resume/{resume_id}`
+- `DELETE /api/documents/job-description/{job_description_id}`
 
 ## Privacy Notes
 
-Do not commit real resumes, real job descriptions, local databases, upload folders, or `.env` files. Use only sanitized sample data in public repositories.
+Documents are stored locally until explicitly deleted through the document deletion API. Do not commit real resumes, real job descriptions, local databases, upload folders, or `.env` files. Use only sanitized sample data in public repositories.
 
 ## Sample Resume Bullets
 

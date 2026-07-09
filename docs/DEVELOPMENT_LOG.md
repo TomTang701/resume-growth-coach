@@ -51,3 +51,32 @@ User-facing project output must remain English-only. These internal logs are bil
 - Use `Start-ResumeGrowthCoach.cmd`; manual virtual-environment activation is not required.
 - Run `scripts/run-quality-gate.ps1` before committing.
 - Never commit real resumes, real job descriptions, `local_data/`, or `.env` files.
+
+## 2026-07-09: P1 QA Remediation
+
+### Changes
+
+- Added optional resume and job-description file uploads to the web UI.
+- Replaced unbounded upload reads with chunked reads capped at the configured 5 MB limit.
+- Made analysis persistence one commit for the analysis, skill matches, and growth goals.
+- Added document deletion endpoints that remove dependent analyses, matches, and goals in the same operation.
+- Added explicit `scripts/run-ollama-smoke-test.ps1` and corrected its PowerShell success-state handling.
+- Rejected CJK text in user-facing Ollama fields so fallback output remains English-only.
+- Updated README and local specification wording to describe deterministic fallback rather than a second fallback model.
+
+### Verification
+
+- `41 passed, 1 warning`.
+- API quality gate passed.
+- Real `qwen2.5:3b` smoke test passed.
+
+### Remaining Problems
+
+- Browser-level end-to-end coverage, concurrency testing, and production data encryption are still not implemented.
+- The dependency deprecation warning remains.
+
+### Future Work
+
+- **P0**: None currently known.
+- **P1**: Add Playwright browser coverage and a local data retention/cleanup command.
+- **P2**: Add SQLite migration support, concurrency tests, and score calibration data.

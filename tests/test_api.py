@@ -63,6 +63,22 @@ def test_document_analysis_and_goals_flow(tmp_path):
     assert "2-week" in goals_response.json()
 
 
+def test_ui_accepts_file_only_resume_and_job_inputs(tmp_path):
+    client = make_client(tmp_path)
+
+    response = client.post(
+        "/ui/analyze",
+        files={
+            "resume_file": ("resume.txt", b"Built Python APIs with Git.", "text/plain"),
+            "job_description_file": ("job.txt", b"Software Engineer requiring Python and Git.", "text/plain"),
+        },
+    )
+
+    assert response.status_code == 200
+    assert "Target JD fit score" in response.text
+    assert "Python" in response.text
+
+
 def test_home_page_renders(tmp_path):
     client = make_client(tmp_path)
 
@@ -176,3 +192,33 @@ def test_analysis_with_missing_document_returns_not_found(tmp_path):
     response = client.post("/api/analyses", json={"resume_id": 999, "job_description_id": 999})
 
     assert response.status_code == 404
+
+
+def test_deleting_resume_removes_related_analysis_data(tmp_path):
+    client = make_client(tmp_path)
+    resume = client.post("/api/documents/resume", data={"text": "Built Python APIs with Git."}).json()
+    job = client.post("/api/documents/job-description", data={"text": "Software Engineer requiring Python and Git."}).json()
+    analysis = client.post(
+        "/api/analyses",
+        json={"resume_id": resume["resume_id"], "job_description_id": job["job_description_id"]},
+    ).json()
+
+    deleted = client.delete(f"/api/documents/resume/{resume['resume_id']}")
+
+    assert deleted.status_code == 200
+    assert deleted.json()["deleted_analysis_count"] == 1
+    assert client.get(f"/api/analyses/{analysis['analysis_id']}").status_code == 404
+    assert client.delete(f"/api/documents/resume/{resume['resume_id']}").status_code == 404
+
+
+def test_upload_size_limit_is_enforced_before_full_file_processing(tmp_path):
+    client = make_client(tmp_path)
+    oversized = b"x" * (5 * 1024 * 1024 + 1)
+
+    response = client.post(
+        "/api/documents/resume",
+        files={"file": ("resume.txt", oversized, "text/plain")},
+    )
+
+    assert response.status_code == 400
+    assert "too large" in response.json()["detail"]

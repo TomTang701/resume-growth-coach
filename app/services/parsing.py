@@ -22,7 +22,7 @@ async def extract_input_text(text: str | None, file: UploadFile | None) -> tuple
     if suffix not in SUPPORTED_EXTENSIONS:
         raise HTTPException(status_code=400, detail="Only .txt and .pdf uploads are supported.")
 
-    content = await file.read()
+    content = await read_limited(file, MAX_UPLOAD_BYTES)
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=400, detail="Uploaded file is too large for the local MVP.")
 
@@ -35,6 +35,20 @@ async def extract_input_text(text: str | None, file: UploadFile | None) -> tuple
         raise HTTPException(status_code=400, detail="The document is empty or could not be parsed.")
 
     return normalize_text(extracted), suffix.lstrip("."), file.filename
+
+
+async def read_limited(file: UploadFile, limit: int, chunk_size: int = 64 * 1024) -> bytes:
+    chunks: list[bytes] = []
+    total = 0
+    while total <= limit:
+        chunk = await file.read(min(chunk_size, limit + 1 - total))
+        if not chunk:
+            break
+        chunks.append(chunk)
+        total += len(chunk)
+        if total > limit:
+            break
+    return b"".join(chunks)
 
 
 def decode_text(content: bytes) -> str:

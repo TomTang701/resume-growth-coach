@@ -66,6 +66,16 @@ Run the reusable adversarial quality gate:
 
 The quality gate runs the regression suite and API contract checks using a temporary SQLite database and a fake LLM response. It does not require Ollama and does not modify the local application database.
 
+## Developer Documentation
+
+English is the default documentation language. Each handoff and log document has a separate Chinese counterpart for reference:
+
+- [Developer Handoff](docs/HANDOFF.md) | [中文交接](docs/HANDOFF.zh-CN.md)
+- [Development Log](docs/DEVELOPMENT_LOG.md) | [中文开发日志](docs/DEVELOPMENT_LOG.zh-CN.md)
+- [Adversarial Test Log](docs/TEST_LOG.md) | [中文测试日志](docs/TEST_LOG.zh-CN.md)
+
+The English file is the default entry point. Update the English document first and commit the matching `.zh-CN.md` translation in the same change.
+
 ## User Interface Walkthrough
 
 The screenshots below use sanitized template data only. They do not include a real person's name, contact information, resume, or job application details.

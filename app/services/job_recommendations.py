@@ -54,7 +54,9 @@ def recommend_matching_jobs(resume_text: str, current_job_text: str = "", limit:
     for profile in JOB_PROFILES:
         if current_title and normalize_title(profile["title"]) == normalize_title(current_title):
             continue
-        result = analyze_resume_against_job(resume_text, profile["description"])
+        # Score the canonical role title so this value is identical to a direct
+        # analysis against the same short title.
+        result = analyze_resume_against_job(resume_text, profile["title"])
         scored.append(
             {
                 "title": profile["title"],

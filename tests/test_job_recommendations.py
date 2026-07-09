@@ -1,4 +1,5 @@
 from app.services.job_recommendations import recommend_matching_jobs
+from app.services.matching import analyze_resume_against_job
 
 
 def test_recommend_matching_jobs_returns_top_three():
@@ -40,3 +41,15 @@ def test_recommendations_exclude_backend_software_engineer_target_role():
 
     assert all(job["title"] != "Backend Software Engineer" for job in jobs)
     assert len(jobs) == 3
+
+
+def test_recommendation_score_matches_direct_analysis_for_same_role():
+    resume = "Python Java SQL Git Docker Kubernetes AWS Google Cloud CI/CD TensorFlow PyTorch."
+    direct_score = analyze_resume_against_job(resume, "Backend Software Engineer").fit_score
+    alternative = next(
+        job
+        for job in recommend_matching_jobs(resume, current_job_text="Software Engineer")
+        if job["title"] == "Backend Software Engineer"
+    )
+
+    assert alternative["fit_score"] == direct_score

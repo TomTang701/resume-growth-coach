@@ -92,7 +92,7 @@ def test_ui_preserves_submitted_text_and_varies_score(tmp_path):
     assert job in response.text
     assert "20.0" not in response.text
     assert "Alternative Matching Jobs" in response.text
-    assert "excluding the current target job" in response.text
+    assert "same canonical role templates" in response.text
 
 
 def test_empty_resume_is_rejected(tmp_path):

@@ -95,7 +95,7 @@
 
             <section>
               <h2>Alternative Matching Jobs</h2>
-              <p class="section-note">These are separate resume-to-role scores for adjacent roles, excluding the current target job.</p>
+              <p class="section-note">These use the same canonical role templates as direct searches, exclude the current target job, and are sorted by score.</p>
               <div class="job-list">
                 {% for job in result.recommended_matching_jobs %}
                   <article class="job-match">

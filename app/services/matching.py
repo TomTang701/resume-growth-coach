@@ -58,6 +58,7 @@ ROLE_SKILL_TEMPLATES: dict[str, tuple[str, ...]] = {
     "full_stack_engineer": ("Python", "JavaScript", "SQL", "REST APIs", "React", "Git", "Testing"),
     "data_analyst": ("SQL", "Python", "Data Analysis", "Excel", "Power BI", "Tableau"),
     "machine_learning_engineer": ("Python", "Machine Learning", "SQL", "Git", "Docker"),
+    "cloud_devops_engineer": ("AWS", "GCP", "Docker", "Kubernetes", "CI/CD", "Linux", "Git"),
 }
 
 REQUIRED_MARKERS = ("required", "must have", "minimum qualifications", "basic qualifications")
@@ -207,6 +208,7 @@ def infer_role_title(job_text: str) -> str:
     role = infer_role_key(job_text)
     role_titles = {
         "machine_learning_engineer": "Machine Learning Engineer",
+        "cloud_devops_engineer": "Cloud or DevOps Engineer",
         "backend_engineer": "Backend Software Engineer",
         "frontend_engineer": "Frontend Developer",
         "full_stack_engineer": "Full Stack Developer",
@@ -220,6 +222,7 @@ def infer_role_key(job_text: str) -> str:
     normalized = normalize_for_matching(job_text)
     role_patterns: tuple[tuple[str, tuple[str, ...]], ...] = (
         ("machine_learning_engineer", ("machine learning engineer", "ml engineer", "ai engineer")),
+        ("cloud_devops_engineer", ("cloud or devops engineer", "cloud engineer", "devops engineer")),
         ("backend_engineer", ("backend software engineer", "backend engineer", "back end engineer", "backend developer")),
         ("frontend_engineer", ("frontend engineer", "front end engineer", "frontend developer")),
         ("full_stack_engineer", ("full stack engineer", "fullstack engineer", "full stack developer")),

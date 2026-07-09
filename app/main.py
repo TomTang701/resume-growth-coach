@@ -208,6 +208,7 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         "analysis_id": analysis.id,
         "fit_summary": analysis.summary,
         "overall_fit_score": analysis.fit_score,
+        "evidence_coverage": deterministic.get("evidence_coverage", 0.0),
         "ollama_status": analysis.model_status,
         "ollama_model": analysis.model_name,
         "ollama_display": build_model_display(analysis.model_status, analysis.model_name),

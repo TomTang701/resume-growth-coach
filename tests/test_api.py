@@ -56,6 +56,7 @@ def test_document_analysis_and_goals_flow(tmp_path):
     assert detail["recommended_matching_jobs"][0]["title"]
     assert detail["ollama_model"]
     assert detail["ollama_display"]
+    assert "evidence_coverage" in detail
 
     goals_response = client.get(f"/api/goals/{body['analysis_id']}")
     assert goals_response.status_code == 200

@@ -10,6 +10,7 @@ The project runs deterministic analysis before any LLM generation. Ollama is opt
 - SQLite persistence through SQLAlchemy
 - Pasted text and `.txt` / `.pdf` document input
 - Deterministic skill matching and explainable fit scoring
+- Evidence-aware fit scoring that distinguishes listed skills from project evidence
 - Optional Ollama summaries with offline fallback
 - Growth goals for 2-week, 1-month, and 3-month horizons
 - pytest coverage for parsing, matching, API flow, and fallback behavior

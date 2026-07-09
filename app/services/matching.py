@@ -117,6 +117,7 @@ STOPWORDS = {
 @dataclass
 class DeterministicResult:
     fit_score: float
+    evidence_coverage: float
     resume_skills: list[str]
     job_required_skills: list[str]
     job_preferred_skills: list[str]
@@ -132,6 +133,7 @@ class DeterministicResult:
     def to_dict(self) -> dict:
         return {
             "fit_score": self.fit_score,
+            "evidence_coverage": self.evidence_coverage,
             "resume_skills": self.resume_skills,
             "job_required_skills": self.job_required_skills,
             "job_preferred_skills": self.job_preferred_skills,
@@ -169,11 +171,22 @@ def analyze_resume_against_job(resume_text: str, job_text: str) -> Deterministic
     evidence = extract_project_evidence(resume_text, matched)
     responsibilities = extract_responsibilities(job_text)
     education = extract_education_signals(resume_text)
-    score = calculate_fit_score(matched, missing, preferred_skills, resume_text, evidence, matched_keywords, job_keywords)
+    evidence_coverage = calculate_evidence_coverage(matched, evidence)
+    score = calculate_fit_score(
+        matched,
+        missing,
+        preferred_skills,
+        resume_text,
+        evidence,
+        matched_keywords,
+        job_keywords,
+        evidence_coverage,
+    )
     improvements = build_improvement_areas(missing, responsibilities)
 
     return DeterministicResult(
         fit_score=score,
+        evidence_coverage=evidence_coverage,
         resume_skills=resume_skills,
         job_required_skills=required_skills,
         job_preferred_skills=preferred_skills,
@@ -321,6 +334,7 @@ def calculate_fit_score(
     evidence: list[str],
     matched_keywords: list[str],
     job_keywords: list[str],
+    evidence_coverage: float,
 ) -> float:
     total_required = len(matched) + len(missing_required)
     if total_required == 0:
@@ -336,7 +350,16 @@ def calculate_fit_score(
     preferred_bonus = min(10.0, 2.0 * len(set(matched).intersection(preferred)))
     evidence_bonus = min(10.0, 2.5 * len(evidence))
     length_penalty = -2.0 if len(resume_text.split()) < 25 else 0.0
-    return round(max(0.0, min(100.0, base + preferred_bonus + evidence_bonus + length_penalty)), 1)
+    evidence_factor = 0.75 + (0.25 * (evidence_coverage / 100.0)) if matched else 1.0
+    adjusted_base = base * evidence_factor
+    return round(max(0.0, min(100.0, adjusted_base + preferred_bonus + evidence_bonus + length_penalty)), 1)
+
+
+def calculate_evidence_coverage(matched: list[str], evidence: list[str]) -> float:
+    if not matched:
+        return 0.0
+    evidence_lines = min(len(evidence), len(matched))
+    return round(100.0 * evidence_lines / len(matched), 1)
 
 
 def build_improvement_areas(missing: list[str], responsibilities: list[str]) -> list[str]:

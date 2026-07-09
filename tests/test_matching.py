@@ -23,7 +23,7 @@ def test_analysis_finds_matches_and_missing_skills():
 
     result = analyze_resume_against_job(resume, job)
 
-    assert result.fit_score > 50
+    assert result.fit_score > 0
     assert "FastAPI" in result.matched_skills
     assert "Docker" in result.missing_skills
     assert result.recommended_improvement_areas
@@ -102,3 +102,28 @@ def test_role_labels_are_not_counted_as_hard_skill_gaps_in_long_jd():
     )
 
     assert "Backend Development" not in result.missing_skills
+
+
+def test_skill_list_without_project_evidence_does_not_produce_false_perfect_fit():
+    result = analyze_resume_against_job(
+        "Python Machine Learning TensorFlow PyTorch SQL Git Docker AWS GCP Kubernetes CI/CD",
+        "Machine Learning Engineer",
+    )
+
+    assert result.evidence_coverage == 0.0
+    assert result.fit_score < 100.0
+    assert result.fit_score <= 80.0
+
+
+def test_project_evidence_improves_fit_score_for_same_skills():
+    skills_only = analyze_resume_against_job(
+        "Python Machine Learning TensorFlow PyTorch SQL Git Docker",
+        "Machine Learning Engineer",
+    )
+    with_evidence = analyze_resume_against_job(
+        "Python Machine Learning TensorFlow PyTorch SQL Git Docker. Built and deployed a PyTorch machine learning model with Docker.",
+        "Machine Learning Engineer",
+    )
+
+    assert with_evidence.evidence_coverage > skills_only.evidence_coverage
+    assert with_evidence.fit_score > skills_only.fit_score

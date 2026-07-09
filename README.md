@@ -38,6 +38,7 @@ Start-ResumeGrowthCoach.cmd
 ```
 
 Both launchers start the FastAPI server and open the local web page automatically.
+They also start the Ollama API if needed and verify that `qwen2.5:3b` is installed before opening the page.
 
 Manual run command:
 
@@ -102,6 +103,7 @@ ollama pull qwen2.5:3b
 ```
 
 If Ollama is not running, the application still returns deterministic analysis.
+The default local-model request timeout is 60 seconds. Override it when needed with `RGC_OLLAMA_TIMEOUT_SECONDS`.
 
 ## API Overview
 

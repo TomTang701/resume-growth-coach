@@ -1,5 +1,5 @@
 from app.services.matching import analyze_resume_against_job
-from app.services.ollama import generate_llm_analysis, parse_json_response, safe_resume_bullets
+from app.services.ollama import generate_llm_analysis, get_ollama_timeout_seconds, parse_json_response, safe_resume_bullets
 
 
 def test_safe_resume_bullets_reject_missing_skill_claims():
@@ -83,3 +83,17 @@ def test_malformed_ollama_response_uses_fallback(monkeypatch):
     output = generate_llm_analysis(result)
 
     assert output["model_status"] == "offline_fallback"
+
+
+def test_invalid_ollama_timeout_configuration_falls_back_to_default(monkeypatch):
+    monkeypatch.setenv("RGC_OLLAMA_TIMEOUT_SECONDS", "not-a-number")
+
+    assert get_ollama_timeout_seconds() == 60.0
+
+
+def test_ollama_timeout_configuration_is_bounded(monkeypatch):
+    monkeypatch.setenv("RGC_OLLAMA_TIMEOUT_SECONDS", "9999")
+    assert get_ollama_timeout_seconds() == 300.0
+
+    monkeypatch.setenv("RGC_OLLAMA_TIMEOUT_SECONDS", "0")
+    assert get_ollama_timeout_seconds() == 1.0

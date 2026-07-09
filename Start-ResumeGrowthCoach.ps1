@@ -2,6 +2,8 @@ $ErrorActionPreference = "Stop"
 
 Set-Location -LiteralPath $PSScriptRoot
 
+& (Join-Path $PSScriptRoot "scripts\ensure-ollama.ps1")
+
 $python = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
 if (-not (Test-Path -LiteralPath $python)) {
     Write-Host "Virtual environment was not found." -ForegroundColor Red

@@ -9,6 +9,13 @@ if not exist ".venv\Scripts\python.exe" (
   exit /b 1
 )
 
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\ensure-ollama.ps1"
+if errorlevel 1 (
+  echo Ollama could not be started or the local model is unavailable.
+  pause
+  exit /b 1
+)
+
 start "Resume Growth Coach" cmd /k ".venv\Scripts\python.exe -m uvicorn app.main:app --reload"
 set "READY="
 for /l %%i in (1,1,30) do (

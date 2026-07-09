@@ -1,5 +1,6 @@
 import json
 import http.client
+import os
 import urllib.error
 import urllib.request
 
@@ -9,6 +10,14 @@ from app.services.matching import SKILL_ALIASES, DeterministicResult, alias_pres
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 DEFAULT_MODEL = "qwen2.5:3b"
+
+
+def get_ollama_timeout_seconds() -> float:
+    try:
+        configured = float(os.getenv("RGC_OLLAMA_TIMEOUT_SECONDS", "60"))
+    except ValueError:
+        return 60.0
+    return max(1.0, min(configured, 300.0))
 
 
 def generate_llm_analysis(result: DeterministicResult, model_name: str | None = None) -> dict:
@@ -28,7 +37,7 @@ def generate_llm_analysis(result: DeterministicResult, model_name: str | None = 
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=8) as response:
+        with urllib.request.urlopen(request, timeout=get_ollama_timeout_seconds()) as response:
             body = json.loads(response.read().decode("utf-8"))
         if not isinstance(body, dict):
             raise ValueError("Ollama response body was not an object.")

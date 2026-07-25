@@ -30,7 +30,12 @@ $qualityPassed = Invoke-Check -Executable $python -Arguments @("tools\quality_ga
 $browserPassed = Invoke-Check -Executable $python -Arguments @("tools\browser_smoke.py")
 $dockerPassed = $false
 if (-not $LocalOnly) {
-    $dockerPassed = Invoke-Check -Executable "powershell.exe" -Arguments @("-NoLogo", "-NoProfile", "-NonInteractive", "-File", (Join-Path $root "scripts\run-docker-smoke.ps1"))
+    try {
+        & (Join-Path $PSScriptRoot "run-docker-smoke.ps1") | Out-Host
+        $dockerPassed = ($LASTEXITCODE -eq 0)
+    } catch {
+        Write-Warning "Docker Compose smoke test failed: $($_.Exception.Message)"
+    }
 }
 
 $ciPassed = $false

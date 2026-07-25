@@ -13,6 +13,8 @@ The project runs deterministic analysis before any LLM generation. Ollama is opt
 - Evidence-aware fit scoring that distinguishes listed skills from project evidence
 - Optional Ollama summaries with offline fallback
 - Growth goals for 2-week, 1-month, and 3-month horizons
+- Portfolio Planner that ranks non-duplicative project proposals from verified skill gaps
+- Resume-eligibility gate that withholds resume bullets until tests, Docker, CI, documentation, and sanitized-demo evidence are supplied
 - pytest coverage for parsing, matching, API flow, and fallback behavior
 
 ## Quick Start
@@ -65,6 +67,32 @@ Run the reusable adversarial quality gate:
 ```
 
 The quality gate runs the regression suite and API contract checks using a temporary SQLite database and a fake LLM response. It does not require Ollama and does not modify the local application database.
+
+## Reproducible PostgreSQL Run
+
+Docker Compose starts PostgreSQL and the application, runs Alembic migrations, and exposes the local UI at `http://127.0.0.1:8000`:
+
+```powershell
+.\scripts\run-docker-smoke.ps1
+```
+
+For normal local Docker use, run `docker compose up --build`. The Compose database credentials are development-only and must not be reused outside this local stack.
+
+Alembic manages fresh PostgreSQL and SQLite schemas. An existing SQLite database created before migrations were introduced must be baselined once without changing its tables:
+
+```powershell
+.\.venv\Scripts\python.exe -m alembic stamp head
+```
+
+## Resume Evidence Gate
+
+Portfolio Planner reads its eligibility state from `local_data/verification-evidence.json`; the API does not accept caller-provided verification flags. Generate the local evidence after substantive changes:
+
+```powershell
+.\scripts\record-verification-evidence.ps1 -LocalOnly
+```
+
+`-LocalOnly` intentionally records Docker and CI as incomplete and exits with code `1`. After Docker smoke passes and the exact commit's GitHub Actions run is green, run without `-LocalOnly` and include `-CiPassed`. Only a fully green evidence file can release a resume bullet draft.
 
 Run the real local-model smoke test when Ollama is installed:
 
@@ -142,6 +170,7 @@ The default local-model request timeout is 60 seconds. Override it when needed w
 - `POST /api/analyses`
 - `GET /api/analyses/{analysis_id}`
 - `GET /api/goals/{analysis_id}`
+- `POST /api/portfolio-plans`
 - `DELETE /api/documents/resume/{resume_id}`
 - `DELETE /api/documents/job-description/{job_description_id}`
 

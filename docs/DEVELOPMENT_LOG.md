@@ -179,3 +179,29 @@ User-facing project output must remain English-only. These internal logs are bil
 - **P0**: None currently known.
 - **P1**: Add migration scripts and run the browser smoke test in CI.
 - **P2**: Add Firefox/WebKit coverage, high-volume load tests, and labeled score calibration.
+
+## 2026-07-25: Portfolio Planning and Evidence Gate
+
+### Changes
+
+- Added built-in backend/full-stack and AI application job templates to the local UI and API.
+- Added Portfolio Planner cards that distinguish active work from non-duplicative future project proposals.
+- Added PostgreSQL/Alembic, Docker Compose, CI, and an evidence-recording script.
+- Changed portfolio bullet eligibility to read a local verification manifest; API request bodies can no longer claim verification flags.
+
+### Verification
+
+- Full regression: `57 passed`.
+- API quality gate and Chromium smoke test passed, including the template and planner path.
+- A local-only evidence run recorded Docker and CI as incomplete, keeping resume eligibility false.
+
+### Remaining Problems
+
+- Docker Desktop is unavailable on this machine, so Compose smoke evidence is not yet recorded.
+- GitHub CI cannot be evidenced until the implementation is committed and pushed.
+
+### Future Work
+
+- **P0**: None currently known.
+- **P1**: Run Docker smoke and exact-head GitHub Actions after publication.
+- **P2**: Add browser coverage to CI and a score-calibration dataset.

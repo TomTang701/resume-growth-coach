@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
@@ -251,3 +252,76 @@ def test_upload_size_limit_is_enforced_before_full_file_processing(tmp_path):
 
     assert response.status_code == 400
     assert "too large" in response.json()["detail"]
+
+
+def test_portfolio_plan_ignores_client_claimed_evidence_without_local_manifest(tmp_path, monkeypatch):
+    monkeypatch.delenv("RGC_EVIDENCE_PATH", raising=False)
+    client = make_client(tmp_path)
+    resume = client.post("/api/documents/resume", data={"text": "Built FastAPI with Python."}).json()
+    job = client.post("/api/documents/job-description", data={"text": "Backend role requiring PostgreSQL, Docker, React, and CI/CD."}).json()
+    analysis = client.post("/api/analyses", json={"resume_id": resume["resume_id"], "job_description_id": job["job_description_id"]}).json()
+
+    response = client.post(
+        "/api/portfolio-plans",
+        json={
+            "analysis_id": analysis["analysis_id"],
+            "existing_project_names": ["Resume Growth Coach"],
+            "evidence": {"tests_passed": True, "docker_smoke_passed": True, "ci_passed": True, "documentation_complete": True, "sanitized_demo_verified": True},
+        },
+    )
+
+    proposal = response.json()["proposals"][0]
+    assert proposal["resume_eligible"] is False
+    assert proposal["english_resume_bullet_draft"] is None
+
+
+def test_portfolio_plan_unlocks_only_from_verified_local_manifest(tmp_path, monkeypatch):
+    evidence_path = tmp_path / "verification-evidence.json"
+    evidence_path.write_text(
+        json.dumps({"tests_passed": True, "docker_smoke_passed": True, "ci_passed": True, "documentation_complete": True, "sanitized_demo_verified": True}),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(evidence_path))
+    client = make_client(tmp_path)
+    resume = client.post("/api/documents/resume", data={"text": "Built FastAPI with Python."}).json()
+    job = client.post("/api/documents/job-description", data={"text": "Backend role requiring PostgreSQL, Docker, React, and CI/CD."}).json()
+    analysis = client.post("/api/analyses", json={"resume_id": resume["resume_id"], "job_description_id": job["job_description_id"]}).json()
+
+    response = client.post(
+        "/api/portfolio-plans",
+        json={"analysis_id": analysis["analysis_id"], "existing_project_names": ["Resume Growth Coach"]},
+    )
+
+    proposal = response.json()["proposals"][0]
+    assert proposal["resume_eligible"] is True
+    assert proposal["english_resume_bullet_draft"]
+
+
+def test_home_and_api_expose_builtin_job_templates(tmp_path):
+    client = make_client(tmp_path)
+
+    home = client.get("/")
+    templates = client.get("/api/job-templates")
+
+    assert home.status_code == 200
+    assert "Backend / Full-stack Internship" in home.text
+    assert templates.status_code == 200
+    assert any(item["slug"] == "backend_full_stack_intern" for item in templates.json()["templates"])
+
+
+def test_ui_template_analysis_shows_portfolio_planner_with_evidence_gate(tmp_path):
+    client = make_client(tmp_path)
+
+    response = client.post(
+        "/ui/analyze",
+        data={
+            "resume_text": "Built a FastAPI service with Python, SQLite, SQLAlchemy, and pytest.",
+            "job_template": "backend_full_stack_intern",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "Portfolio Planner" in response.text
+    assert "Team Job Workflow" in response.text
+    assert "Implementation active; evidence gate pending." in response.text
+    assert "Not resume-eligible until all verification evidence is recorded." in response.text

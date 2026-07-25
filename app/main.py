@@ -10,12 +10,14 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.database import get_db, init_db
-from app.schemas import AnalysisCreate, AnalysisCreateResponse, DocumentResponse
+from app.schemas import AnalysisCreate, AnalysisCreateResponse, DocumentResponse, PortfolioPlanCreate
 from app.services.goals import build_growth_goals
 from app.services.job_recommendations import recommend_matching_jobs
 from app.services.matching import analyze_resume_against_job, extract_skills, infer_role_title
+from app.services.job_templates import get_job_template, list_job_templates
 from app.services.ollama import generate_llm_analysis
 from app.services.parsing import detect_resume_sections, extract_input_text, preview_text
+from app.services.portfolio_planner import build_portfolio_plan, load_recorded_evidence
 
 
 @asynccontextmanager
@@ -26,6 +28,20 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="Resume Growth Coach", version="0.1.0", lifespan=lifespan)
 APP_DIR = Path(__file__).resolve().parent
+EXISTING_PROJECT_NAMES = [
+    "Resume Growth Coach",
+    "Amazon Clone",
+    "Pet Adoption Management Platform",
+    "iPhone Mirroring for Windows",
+    "Team Job Workflow",
+]
+ACTIVE_PORTFOLIO_PROJECTS = [
+    {
+        "name": "Team Job Workflow",
+        "status": "Implementation active; evidence gate pending.",
+        "remaining_evidence": "Run Docker smoke and GitHub CI before generating a resume bullet.",
+    }
+]
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
 
@@ -35,7 +51,7 @@ def home(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request,
         "index.html",
-        {"result": None, "error": None, "form_values": {"resume_text": "", "job_description_text": ""}},
+        {"result": None, "error": None, "form_values": {"resume_text": "", "job_description_text": "", "job_template": ""}, "job_templates": list_job_templates()},
     )
 
 
@@ -49,12 +65,18 @@ async def analyze_from_ui(
     request: Request,
     resume_text: str = Form(""),
     job_description_text: str = Form(""),
+    job_template: str = Form(""),
     resume_file: UploadFile | None = File(None),
     job_description_file: UploadFile | None = File(None),
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
-    form_values = {"resume_text": resume_text, "job_description_text": job_description_text}
+    form_values = {"resume_text": resume_text, "job_description_text": job_description_text, "job_template": job_template}
     try:
+        if job_template and not job_description_text.strip() and not (job_description_file and job_description_file.filename):
+            try:
+                job_description_text = get_job_template(job_template)
+            except KeyError as exc:
+                raise HTTPException(status_code=400, detail="Unknown job template.") from exc
         if not resume_text.strip() and not (resume_file and resume_file.filename):
             raise HTTPException(status_code=400, detail="Resume content is required.")
         if not job_description_text.strip() and not (job_description_file and job_description_file.filename):
@@ -65,9 +87,9 @@ async def analyze_from_ui(
         job = create_job_description(db, job_content, job_source, job_filename)
         analysis = run_analysis(db, resume.id, job.id, None)
         result = build_analysis_payload(db, analysis)
-        return templates.TemplateResponse(request, "index.html", {"result": result, "error": None, "form_values": form_values})
+        return templates.TemplateResponse(request, "index.html", {"result": result, "error": None, "form_values": form_values, "job_templates": list_job_templates()})
     except HTTPException as exc:
-        return templates.TemplateResponse(request, "index.html", {"result": None, "error": exc.detail, "form_values": form_values})
+        return templates.TemplateResponse(request, "index.html", {"result": None, "error": exc.detail, "form_values": form_values, "job_templates": list_job_templates()})
 
 
 @app.post("/api/documents/resume", response_model=DocumentResponse)
@@ -132,6 +154,37 @@ def get_goals(analysis_id: int, db: Session = Depends(get_db)) -> dict:
     fetch_analysis(db, analysis_id)
     rows = db.query(models.GrowthGoal).filter(models.GrowthGoal.analysis_id == analysis_id).all()
     return {row.horizon: json.loads(row.goals_json) for row in rows}
+
+
+@app.post("/api/portfolio-plans")
+def create_portfolio_plan(payload: PortfolioPlanCreate, db: Session = Depends(get_db)) -> dict:
+    analysis = fetch_analysis(db, payload.analysis_id)
+    deterministic = json.loads(analysis.deterministic_result_json)
+    proposals = build_portfolio_plan(
+        missing_skills=deterministic["missing_skills"],
+        existing_project_names=payload.existing_project_names,
+        evidence=load_recorded_evidence(),
+    )
+    return {
+        "analysis_id": analysis.id,
+        "proposals": [
+            {
+                "slug": proposal.slug,
+                "name": proposal.name,
+                "summary": proposal.summary,
+                "gap_coverage": proposal.gap_coverage,
+                "acceptance_criteria": proposal.acceptance_criteria,
+                "resume_eligible": proposal.resume_eligible,
+                "english_resume_bullet_draft": proposal.english_resume_bullet_draft,
+            }
+            for proposal in proposals
+        ],
+    }
+
+
+@app.get("/api/job-templates")
+def get_job_templates() -> dict[str, list[dict[str, str]]]:
+    return {"templates": list_job_templates()}
 
 
 def create_resume(db: Session, content: str, source_type: str, filename: str | None) -> models.Document:
@@ -244,6 +297,11 @@ def fetch_analysis(db: Session, analysis_id: int) -> models.Analysis:
 
 def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
     deterministic = json.loads(analysis.deterministic_result_json)
+    portfolio_plan = build_portfolio_plan(
+        missing_skills=deterministic["missing_skills"],
+        existing_project_names=EXISTING_PROJECT_NAMES,
+        evidence=load_recorded_evidence(),
+    )
     goals = {
         row.horizon: json.loads(row.goals_json)
         for row in db.query(models.GrowthGoal).filter(models.GrowthGoal.analysis_id == analysis.id).all()
@@ -267,6 +325,8 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         "recommended_project_additions": deterministic.get("project_suggestions", []),
         "recommended_matching_jobs": recommend_matching_jobs(analysis.resume.content, analysis.job_description.content),
         "english_resume_bullet_drafts": deterministic.get("resume_bullet_drafts", []),
+        "portfolio_plan": portfolio_plan,
+        "active_portfolio_projects": ACTIVE_PORTFOLIO_PROJECTS,
         "deterministic_details": deterministic,
     }
 

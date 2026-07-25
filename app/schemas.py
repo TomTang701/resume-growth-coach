@@ -20,3 +20,8 @@ class AnalysisCreateResponse(BaseModel):
     deterministic_fit_score: float
     ollama_status: str
     ollama_model: str
+
+
+class PortfolioPlanCreate(BaseModel):
+    analysis_id: int
+    existing_project_names: list[str] = []

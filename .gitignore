@@ -8,6 +8,7 @@ __pycache__/
 *.db
 .env
 .env.*
+.jcodemunch.jsonc
 uploads/
 local_data/
 real_samples/

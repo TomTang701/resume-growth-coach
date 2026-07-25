@@ -153,3 +153,24 @@
 - 已安装 `httpx2==2.5.0` 并更新依赖文件。
 - 全量回归和 quality gate：`49 passed`，无 warning。
 - 直接执行 `cleanup_local_data.py --help`：首次因根目录导入路径问题失败；修复后重新验证通过。
+
+## 2026-07-25 Portfolio 与证据门槛验证
+
+### 已检查
+
+- 通过渲染表单和 API 选择内置岗位模板。
+- Planner 展示进行中项目和不重复建议。
+- 缺少本地证据清单时拒绝客户端自报的验证通过标志。
+- 只有完整为真的本地清单才能解锁资格。
+- 以本地模式执行证据脚本。
+
+### 结果
+
+- 全量回归：`57 passed`。
+- Chromium smoke 通过，覆盖模板和 Planner。
+- 本地证据正确记录 Docker/CI 未完成并以退出码 `1` 结束。
+
+### 剩余覆盖范围
+
+- 当前环境仍不能完成 Docker Compose smoke 和精确 HEAD 的 GitHub Actions。
+- 跨浏览器覆盖与分数校准仍待完成。

@@ -22,6 +22,13 @@
 
             <label for="job_description_text">Job description</label>
             <textarea id="job_description_text" name="job_description_text" placeholder="Paste a target job description here.">{{ form_values.job_description_text }}</textarea>
+            <label for="job_template">Or choose a built-in job template</label>
+            <select id="job_template" name="job_template">
+              <option value="">Use pasted or uploaded JD</option>
+              {% for template in job_templates %}
+                <option value="{{ template.slug }}" {% if form_values.job_template == template.slug %}selected{% endif %}>{{ template.title }}</option>
+              {% endfor %}
+            </select>
             <label for="job_description_file">Or upload job description (.txt or .pdf)</label>
             <input id="job_description_file" name="job_description_file" type="file" accept=".txt,.pdf">
 
@@ -96,6 +103,38 @@
                   {% endfor %}
                 </ul>
               {% endfor %}
+            </section>
+
+            <section>
+              <h2>Portfolio Planner</h2>
+              <p class="section-note">Not resume-eligible until all verification evidence is recorded.</p>
+              {% for project in result.active_portfolio_projects %}
+                <article class="job-match">
+                  <div>
+                    <h3>{{ project.name }}</h3>
+                    <p>{{ project.status }}</p>
+                    <p class="section-note">{{ project.remaining_evidence }}</p>
+                  </div>
+                </article>
+              {% endfor %}
+              <div class="job-list">
+                {% for proposal in result.portfolio_plan %}
+                  <article class="job-match">
+                    <div>
+                      <h3>{{ proposal.name }}</h3>
+                      <p>{{ proposal.summary }}</p>
+                      <p class="section-note">Gap coverage: {{ proposal.gap_coverage | join(', ') }}</p>
+                      {% if proposal.resume_eligible %}
+                        <p>{{ proposal.english_resume_bullet_draft }}</p>
+                      {% else %}
+                        <p class="section-note">Complete tests, Docker smoke, CI, documentation, and sanitized-demo checks before using a resume bullet.</p>
+                      {% endif %}
+                    </div>
+                  </article>
+                {% else %}
+                  <p>No non-duplicative project proposal is required for these gaps.</p>
+                {% endfor %}
+              </div>
             </section>
 
             <section>

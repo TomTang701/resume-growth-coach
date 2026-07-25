@@ -1,0 +1,32 @@
+from app.services.portfolio_planner import EvidenceChecklist, build_portfolio_plan
+
+
+def test_planner_ranks_team_workflow_for_uncovered_full_stack_gaps():
+    plan = build_portfolio_plan(
+        missing_skills=["PostgreSQL", "Docker", "React", "CI/CD"],
+        existing_project_names=["Resume Growth Coach", "Amazon Clone"],
+        evidence=EvidenceChecklist(),
+    )
+
+    assert plan[0].slug == "team-job-workflow"
+    assert "PostgreSQL" in plan[0].gap_coverage
+    assert plan[0].resume_eligible is False
+    assert plan[0].english_resume_bullet_draft is None
+
+
+def test_planner_excludes_existing_project_and_releases_bullet_only_after_evidence():
+    plan = build_portfolio_plan(
+        missing_skills=["Docker", "PostgreSQL", "CI/CD"],
+        existing_project_names=["Resume Growth Coach"],
+        evidence=EvidenceChecklist(
+            tests_passed=True,
+            docker_smoke_passed=True,
+            ci_passed=True,
+            documentation_complete=True,
+            sanitized_demo_verified=True,
+        ),
+    )
+
+    assert all(item.slug != "resume-growth-coach-upgrade" for item in plan)
+    assert plan[0].resume_eligible is True
+    assert plan[0].english_resume_bullet_draft

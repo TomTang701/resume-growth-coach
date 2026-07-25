@@ -55,6 +55,14 @@ def main() -> int:
                 assert page.locator("text=Alternative Matching Jobs").count() == 1
 
                 page.goto(BASE_URL, wait_until="domcontentloaded")
+                page.locator("#resume_text").fill("Built a FastAPI service with Python, SQLite, SQLAlchemy, and pytest.")
+                page.locator("#job_template").select_option("backend_full_stack_intern")
+                page.get_by_role("button", name="Run analysis").click()
+                page.locator(".score").wait_for()
+                assert page.locator("text=Portfolio Planner").count() == 1
+                assert page.locator("text=Implementation active; evidence gate pending.").count() == 1
+
+                page.goto(BASE_URL, wait_until="domcontentloaded")
                 page.locator("#resume_text").fill("Built Python APIs with Git.")
                 page.get_by_role("button", name="Run analysis").click()
                 assert page.locator("text=Job description content is required.").count() == 1
@@ -75,7 +83,7 @@ def main() -> int:
                 server.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 server.kill()
-    print("Browser smoke test passed: page load, text analysis, validation recovery, and file upload.")
+    print("Browser smoke test passed: page load, text and template analysis, planner display, validation recovery, and file upload.")
     return 0
 
 

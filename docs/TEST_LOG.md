@@ -153,3 +153,24 @@ or:
 - `httpx2==2.5.0` installed and dependency files updated.
 - Full regression and quality gate: `49 passed`, no warning.
 - Direct `cleanup_local_data.py --help`: initially failed because of a root-path import issue; fixed and retested successfully.
+
+## 2026-07-25 Portfolio and Evidence-Gate Verification
+
+### Checked
+
+- Built-in job template selection through the rendered form and API.
+- Planner display for active work and non-duplicative proposals.
+- Rejection of client-claimed verification flags without a local evidence manifest.
+- Eligibility release only when a fully positive local manifest is present.
+- Evidence script execution in local-only mode.
+
+### Results
+
+- Full regression: `57 passed`.
+- Chromium smoke test: passed with template and planner coverage.
+- Local evidence correctly records Docker and CI as incomplete and exits with code `1`.
+
+### Remaining Coverage
+
+- Docker Compose smoke and exact-head GitHub Actions remain unavailable in the current environment.
+- Cross-browser coverage and score calibration remain open.

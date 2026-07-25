@@ -179,3 +179,29 @@
 - **P0**：当前没有已知 P0 问题。
 - **P1**：增加 migration 脚本，并在 CI 执行浏览器 smoke test。
 - **P2**：增加 Firefox/WebKit 覆盖、高负载测试和标注分数校准。
+
+## 2026-07-25：Portfolio Planner 与证据门槛
+
+### 修改内容
+
+- 在本地 UI 和 API 中增加后端/全栈、AI 应用岗位模板。
+- 增加 Portfolio Planner 卡片，区分进行中的项目和不重复的后续项目建议。
+- 增加 PostgreSQL/Alembic、Docker Compose、CI 和验证证据记录脚本。
+- 将简历 bullet 资格改为读取本地验证清单；API 请求体不能再自报验证通过。
+
+### 验证结果
+
+- 全量回归：`57 passed`。
+- API quality gate 和 Chromium smoke 通过，覆盖模板和 Planner 路径。
+- 本地模式证据运行记录 Docker/CI 未完成，因此简历资格保持为 false。
+
+### 仍存在的问题
+
+- 本机没有 Docker Desktop，尚不能记录 Compose smoke 证据。
+- 实现尚未提交和推送，因此还不能取得 GitHub CI 证据。
+
+### 未来计划
+
+- **P0**：当前没有已知 P0 问题。
+- **P1**：发布后运行 Docker smoke 和精确 HEAD 的 GitHub Actions。
+- **P2**：在 CI 中增加浏览器覆盖和分数校准数据集。

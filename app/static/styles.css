@@ -82,14 +82,18 @@ label {
   font-weight: 700;
 }
 
-textarea {
+textarea,
+select {
   width: 100%;
-  min-height: 220px;
-  resize: vertical;
   border: 1px solid #c9d0dc;
   border-radius: 6px;
   padding: 12px;
   font: inherit;
+}
+
+textarea {
+  min-height: 220px;
+  resize: vertical;
   line-height: 1.45;
 }
 

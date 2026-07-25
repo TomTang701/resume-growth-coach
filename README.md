@@ -92,7 +92,7 @@ Portfolio Planner reads its eligibility state from `local_data/verification-evid
 .\scripts\record-verification-evidence.ps1 -LocalOnly
 ```
 
-`-LocalOnly` intentionally records Docker and CI as incomplete and exits with code `1`. After Docker smoke passes and the exact commit's GitHub Actions run is green, run without `-LocalOnly` and include `-CiPassed`. Only a fully green evidence file can release a resume bullet draft.
+`-LocalOnly` intentionally records Docker and CI as incomplete and exits with code `1`. After Docker smoke passes and the exact commit's GitHub Actions run is green, run without `-LocalOnly`; the script queries that commit's CI result automatically. Only a fully green evidence file can release a resume bullet draft.
 
 Run the real local-model smoke test when Ollama is installed:
 

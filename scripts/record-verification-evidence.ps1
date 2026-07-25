@@ -1,8 +1,7 @@
 #requires -Version 5.1
 [CmdletBinding()]
 param(
-    [switch]$LocalOnly,
-    [switch]$CiPassed
+    [switch]$LocalOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -34,6 +33,19 @@ if (-not $LocalOnly) {
     $dockerPassed = Invoke-Check -Executable "powershell.exe" -Arguments @("-NoLogo", "-NoProfile", "-NonInteractive", "-File", (Join-Path $root "scripts\run-docker-smoke.ps1"))
 }
 
+$ciPassed = $false
+if (-not $LocalOnly -and (Get-Command gh -ErrorAction SilentlyContinue)) {
+    $repoUrl = git -C $root remote get-url origin 2>$null
+    $commit = git -C $root rev-parse HEAD 2>$null
+    if ($repoUrl -match "github\.com[:/](?<owner>[^/]+)/(?<name>[^/.]+)(\.git)?$") {
+        $repoName = "$($Matches.owner)/$($Matches.name)"
+        $runs = gh run list --repo $repoName --commit $commit --limit 1 --json status,conclusion | ConvertFrom-Json
+        if ($runs.Count -eq 1 -and $runs[0].status -eq "completed" -and $runs[0].conclusion -eq "success") {
+            $ciPassed = $true
+        }
+    }
+}
+
 $documentationComplete = (Test-Path -LiteralPath (Join-Path $root "README.md")) -and (Test-Path -LiteralPath (Join-Path $root "docs\TEST_REPORT.md"))
 $sanitizedDemoVerified = (Test-Path -LiteralPath (Join-Path $root "samples\sanitized\resume.txt")) -and (Test-Path -LiteralPath (Join-Path $root "samples\sanitized\job_description.txt"))
 $evidence = [ordered]@{
@@ -41,7 +53,7 @@ $evidence = [ordered]@{
     generated_by = "scripts/record-verification-evidence.ps1"
     tests_passed = ($testsPassed -and $qualityPassed -and $browserPassed)
     docker_smoke_passed = $dockerPassed
-    ci_passed = $CiPassed.IsPresent
+    ci_passed = $ciPassed
     documentation_complete = $documentationComplete
     sanitized_demo_verified = $sanitizedDemoVerified
 }

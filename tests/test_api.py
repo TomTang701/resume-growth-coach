@@ -255,7 +255,7 @@ def test_upload_size_limit_is_enforced_before_full_file_processing(tmp_path):
 
 
 def test_portfolio_plan_ignores_client_claimed_evidence_without_local_manifest(tmp_path, monkeypatch):
-    monkeypatch.delenv("RGC_EVIDENCE_PATH", raising=False)
+    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(tmp_path / "missing-verification-evidence.json"))
     client = make_client(tmp_path)
     resume = client.post("/api/documents/resume", data={"text": "Built FastAPI with Python."}).json()
     job = client.post("/api/documents/job-description", data={"text": "Backend role requiring PostgreSQL, Docker, React, and CI/CD."}).json()

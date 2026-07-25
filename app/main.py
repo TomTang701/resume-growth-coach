@@ -17,7 +17,7 @@ from app.services.matching import analyze_resume_against_job, extract_skills, in
 from app.services.job_templates import get_job_template, list_job_templates
 from app.services.ollama import generate_llm_analysis
 from app.services.parsing import detect_resume_sections, extract_input_text, preview_text
-from app.services.portfolio_planner import build_portfolio_plan, load_recorded_evidence
+from app.services.portfolio_planner import EvidenceChecklist, build_portfolio_plan, load_recorded_evidence
 
 
 @asynccontextmanager
@@ -35,13 +35,13 @@ EXISTING_PROJECT_NAMES = [
     "iPhone Mirroring for Windows",
     "Team Job Workflow",
 ]
-ACTIVE_PORTFOLIO_PROJECTS = [
-    {
-        "name": "Team Job Workflow",
-        "status": "Implementation active; evidence gate pending.",
-        "remaining_evidence": "Run Docker smoke and GitHub CI before generating a resume bullet.",
-    }
-]
+EVIDENCE_LABELS = (
+    ("tests_passed", "tests"),
+    ("docker_smoke_passed", "Docker smoke"),
+    ("ci_passed", "CI"),
+    ("documentation_complete", "documentation"),
+    ("sanitized_demo_verified", "sanitized demo data"),
+)
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
 
@@ -297,10 +297,11 @@ def fetch_analysis(db: Session, analysis_id: int) -> models.Analysis:
 
 def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
     deterministic = json.loads(analysis.deterministic_result_json)
+    evidence = load_recorded_evidence()
     portfolio_plan = build_portfolio_plan(
         missing_skills=deterministic["missing_skills"],
         existing_project_names=EXISTING_PROJECT_NAMES,
-        evidence=load_recorded_evidence(),
+        evidence=evidence,
     )
     goals = {
         row.horizon: json.loads(row.goals_json)
@@ -326,8 +327,28 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         "recommended_matching_jobs": recommend_matching_jobs(analysis.resume.content, analysis.job_description.content),
         "english_resume_bullet_drafts": deterministic.get("resume_bullet_drafts", []),
         "portfolio_plan": portfolio_plan,
-        "active_portfolio_projects": ACTIVE_PORTFOLIO_PROJECTS,
+        "active_portfolio_projects": [build_portfolio_project_status(evidence)],
         "deterministic_details": deterministic,
+    }
+
+
+def build_portfolio_project_status(evidence: EvidenceChecklist) -> dict:
+    if evidence.resume_eligible:
+        return {
+            "name": "Resume Growth Coach",
+            "status": "Resume-eligible: all verification evidence is recorded.",
+            "remaining_evidence": "Verified evidence can support English resume bullet drafts.",
+        }
+
+    missing_evidence = [label for field, label in EVIDENCE_LABELS if not getattr(evidence, field)]
+    if len(missing_evidence) == 1:
+        missing_text = missing_evidence[0]
+    else:
+        missing_text = f"{', '.join(missing_evidence[:-1])}, and {missing_evidence[-1]}"
+    return {
+        "name": "Resume Growth Coach",
+        "status": f"Verification incomplete: {missing_text}.",
+        "remaining_evidence": "Resume bullet drafts remain blocked until the missing verification evidence is recorded.",
     }
 
 

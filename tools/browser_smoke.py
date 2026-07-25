@@ -33,6 +33,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="resume-growth-browser-") as temp_dir:
         env = os.environ.copy()
         env["RGC_DATABASE_URL"] = f"sqlite:///{Path(temp_dir) / 'browser.sqlite3'}"
+        env["RGC_EVIDENCE_PATH"] = str(Path(temp_dir) / "missing-evidence.json")
         server = subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8765", "--no-access-log"],
             cwd=ROOT,
@@ -60,7 +61,8 @@ def main() -> int:
                 page.get_by_role("button", name="Run analysis").click()
                 page.locator(".score").wait_for()
                 assert page.locator("text=Portfolio Planner").count() == 1
-                assert page.locator("text=Implementation active; evidence gate pending.").count() == 1
+                assert page.locator("text=Verification incomplete: tests, Docker smoke, CI, documentation, and sanitized demo data.").count() == 1
+                assert page.locator("text=Implementation active; evidence gate pending.").count() == 0
 
                 page.goto(BASE_URL, wait_until="domcontentloaded")
                 page.locator("#resume_text").fill("Built Python APIs with Git.")

@@ -5,7 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 from fastapi.testclient import TestClient
 
 from app import database
-from app.main import app
+from app.main import app, build_portfolio_project_status
+from app.services.portfolio_planner import EvidenceChecklist
 
 
 def make_client(tmp_path: Path) -> TestClient:
@@ -309,7 +310,8 @@ def test_home_and_api_expose_builtin_job_templates(tmp_path):
     assert any(item["slug"] == "backend_full_stack_intern" for item in templates.json()["templates"])
 
 
-def test_ui_template_analysis_shows_portfolio_planner_with_evidence_gate(tmp_path):
+def test_ui_template_analysis_shows_incomplete_portfolio_evidence_gate(tmp_path, monkeypatch):
+    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(tmp_path / "missing-evidence.json"))
     client = make_client(tmp_path)
 
     response = client.post(
@@ -322,6 +324,51 @@ def test_ui_template_analysis_shows_portfolio_planner_with_evidence_gate(tmp_pat
 
     assert response.status_code == 200
     assert "Portfolio Planner" in response.text
-    assert "Team Job Workflow" in response.text
-    assert "Implementation active; evidence gate pending." in response.text
-    assert "Not resume-eligible until all verification evidence is recorded." in response.text
+    assert "Resume Growth Coach" in response.text
+    assert "Verification incomplete: tests, Docker smoke, CI, documentation, and sanitized demo data." in response.text
+    assert "Resume bullet drafts remain blocked until the missing verification evidence is recorded." in response.text
+    assert "Implementation active; evidence gate pending." not in response.text
+
+
+def test_ui_template_analysis_shows_resume_eligible_portfolio_evidence(tmp_path, monkeypatch):
+    evidence_path = tmp_path / "verification-evidence.json"
+    evidence_path.write_text(
+        json.dumps(
+            {
+                "tests_passed": True,
+                "docker_smoke_passed": True,
+                "ci_passed": True,
+                "documentation_complete": True,
+                "sanitized_demo_verified": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(evidence_path))
+    client = make_client(tmp_path)
+
+    response = client.post(
+        "/ui/analyze",
+        data={
+            "resume_text": "Built a FastAPI service with Python, SQLite, SQLAlchemy, and pytest.",
+            "job_template": "backend_full_stack_intern",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "Resume Growth Coach" in response.text
+    assert "Resume-eligible: all verification evidence is recorded." in response.text
+    assert "Verified evidence can support English resume bullet drafts." in response.text
+
+
+def test_portfolio_evidence_status_names_a_single_missing_requirement():
+    status = build_portfolio_project_status(
+        EvidenceChecklist(
+            tests_passed=True,
+            docker_smoke_passed=True,
+            documentation_complete=True,
+            sanitized_demo_verified=True,
+        )
+    )
+
+    assert status["status"] == "Verification incomplete: CI."

@@ -145,23 +145,23 @@ Paste a sanitized resume and a target job description into the two input boxes.
 
 ![Empty Resume Growth Coach screen](docs/images/01-empty-screen.png)
 
-### Template Input
-
-The left panel keeps the submitted resume and job description visible so the user can verify what was analyzed.
-
-![Filled sanitized template input](docs/images/02-filled-template.png)
-
 ### Analysis Results
 
-The right panel shows the deterministic fit score, the Ollama status and model name, matched skills, missing skills, evidence, roadmap, recommended jobs, and resume bullet drafts.
+The analysis view keeps the submitted inputs visible while showing the deterministic score, Ollama status, matching evidence, and skill gaps.
 
-![Analysis results with sanitized sample data](docs/images/03-analysis-results.png)
+![Sanitized Resume Growth Coach analysis results](docs/images/02-analysis-results.png)
 
-### Matching Job Recommendations
+### Growth Roadmap and Planner
 
-The app also recommends the top matching job directions for the resume, with a score and a short reason for each option.
+The roadmap organizes next steps by time horizon, while Portfolio Planner clearly explains whether recorded evidence can support a resume bullet draft.
 
-![Recommended matching jobs section](docs/images/04-job-recommendations.png)
+![Sanitized growth roadmap and portfolio planner](docs/images/03-growth-roadmap.png)
+
+### Matching Jobs and Bullet Drafts
+
+The app recommends adjacent roles with ranked explanations and produces English resume-bullet drafts only when its evidence gate is satisfied.
+
+![Sanitized matching jobs and resume bullet drafts](docs/images/04-matching-jobs-and-bullets.png)
 
 ## Optional Ollama Setup
 

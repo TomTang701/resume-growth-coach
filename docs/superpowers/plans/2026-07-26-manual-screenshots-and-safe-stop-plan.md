@@ -60,7 +60,7 @@ Copy-Item -LiteralPath 'C:\Users\tangz\AppData\Local\Temp\codex-clipboard-14d691
 Copy-Item -LiteralPath 'C:\Users\tangz\AppData\Local\Temp\codex-clipboard-68655d83-e4e9-4104-9fb1-3eb8802c4b63.png' -Destination 'docs\images\04-matching-jobs-and-bullets.png'
 ~~~
 
-Rename the four sections to Start Screen, Analysis Results, Growth Roadmap and Planner, and Matching Jobs and Bullet Drafts. Delete only superseded legacy assets.
+Rename the four sections to Start Screen, Analysis Results, Growth Roadmap and Planner, and Matching Jobs and Bullet Drafts. Delete only superseded legacy assets. If the environment rejects deletion, retain those tracked legacy PNGs unreferenced and document that exception rather than bypassing the deletion safeguard.
 
 - [ ] **Step 4: Run focused test and inspect the copied assets**
 
@@ -79,7 +79,7 @@ git commit -m "docs: refresh manual UI screenshots"
 
 **Files:**
 
-- Create: scripts/local-server.ps1, Stop-ResumeGrowthCoach.ps1, Stop-ResumeGrowthCoach.cmd, tests/test_local_lifecycle.py
+- Create: app/lifecycle.py, scripts/local-server.ps1, Stop-ResumeGrowthCoach.ps1, Stop-ResumeGrowthCoach.cmd, tests/test_local_lifecycle.py
 - Modify: Start-ResumeGrowthCoach.ps1, Start-ResumeGrowthCoach.cmd, .gitignore, README.md
 
 **Interfaces:**
@@ -148,4 +148,3 @@ Run: Get-Content -Raw local_data\verification-evidence.json
 Run: git status --short
 
 Expected: all eligibility booleans are true for HEAD; only Tom's known untracked pet assets remain.
-

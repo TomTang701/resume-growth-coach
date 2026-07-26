@@ -42,6 +42,14 @@ Start-ResumeGrowthCoach.cmd
 Both launchers start the FastAPI server and open the local web page automatically.
 They also start the Ollama API if needed and verify that `qwen2.5:3b` is installed before opening the page.
 
+To stop only the server started by these launchers, run:
+
+```powershell
+.\Stop-ResumeGrowthCoach.ps1
+```
+
+Or double-click `Stop-ResumeGrowthCoach.cmd`. The stop command refuses to terminate a process unless its local PID record, command line, checkout path, and loopback port-8000 listener all match this project. Add `-WhatIf` to the PowerShell command to validate the target without stopping it.
+
 Manual run command:
 
 ```powershell

@@ -15,11 +15,11 @@ README assets will be replaced with these names and meanings:
 - `docs/images/03-growth-roadmap.png`: roadmap and Portfolio Planner eligibility.
 - `docs/images/04-matching-jobs-and-bullets.png`: alternative roles and resume-bullet drafts.
 
-The walkthrough headings and alt text will match those four screens. The obsolete legacy screenshot files and references will be removed. No agent-generated image, crop, or visual reconstruction is permitted.
+The walkthrough headings and alt text will match those four screens. Obsolete legacy screenshot references are removed. The legacy source PNG files remain as unreferenced tracked history because the local environment rejected file deletion; they are not used by the README. No agent-generated image, crop, or visual reconstruction is permitted.
 
 ## Local Server Lifecycle
 
-`Start-ResumeGrowthCoach.cmd` and `Start-ResumeGrowthCoach.ps1` will launch the existing Uvicorn reload process through one common PowerShell launcher. That launcher will write an ignored local PID record containing the root process ID and checkout path only after the HTTP health check succeeds.
+`Start-ResumeGrowthCoach.cmd` and `Start-ResumeGrowthCoach.ps1` will launch the existing Uvicorn reload process through one common PowerShell launcher. That launcher will write an ignored local PID record containing the root process ID and checkout path only after the HTTP health check succeeds. A small dependency-free Python validator verifies the persisted record metadata before PowerShell evaluates the live Windows process tree.
 
 `Stop-ResumeGrowthCoach.cmd` will call `Stop-ResumeGrowthCoach.ps1`. The stop script will:
 

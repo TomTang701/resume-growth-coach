@@ -205,3 +205,22 @@ User-facing project output must remain English-only. These internal logs are bil
 - **P0**: None currently known.
 - **P1**: Run Docker smoke and exact-head GitHub Actions after publication.
 - **P2**: Add browser coverage to CI and a score-calibration dataset.
+
+## 2026-07-25 Runtime Evidence Closure
+
+### Changes
+
+- Replaced the stale static Portfolio Planner card with status derived from the recorded verification checklist.
+- Added deterministic incomplete-evidence coverage to the Chromium smoke test.
+- Added the Chromium smoke test as a dedicated GitHub Actions job.
+
+### Verification
+
+- Full regression and quality/API gate: 59 passed.
+- Chromium browser smoke and Docker Compose/PostgreSQL smoke passed locally.
+- Exact-head CI passed, including the browser job: https://github.com/TomTang701/resume-growth-coach/actions/runs/30180380459
+- The local evidence manifest now records every resume-eligibility requirement as true.
+
+### Remaining Problems
+
+- Firefox/WebKit coverage, high-volume load testing, and human-labeled score calibration remain future work.

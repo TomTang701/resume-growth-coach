@@ -205,3 +205,22 @@
 - **P0**：当前没有已知 P0 问题。
 - **P1**：发布后运行 Docker smoke 和精确 HEAD 的 GitHub Actions。
 - **P2**：在 CI 中增加浏览器覆盖和分数校准数据集。
+
+## 2026-07-25：运行时证据闭环
+
+### 修改内容
+
+- 将过期的静态 Portfolio Planner 卡片替换为基于本地验证清单的动态状态。
+- 为 Chromium 冒烟测试增加确定性的“不完整证据”覆盖。
+- 在 GitHub Actions 中增加独立的 Chromium 浏览器冒烟任务。
+
+### 验证结果
+
+- 全量回归及质量/API 门禁：59 passed。
+- Chromium 浏览器冒烟和 Docker Compose/PostgreSQL 冒烟均在本地通过。
+- 精确 HEAD 的 CI（含浏览器任务）通过：https://github.com/TomTang701/resume-growth-coach/actions/runs/30180380459
+- 本地证据清单现已将所有 resume-eligible 条件记录为 true。
+
+### 仍存在的问题
+
+- Firefox/WebKit 覆盖、高并发负载测试和人工标注的分数校准仍属于后续工作。

@@ -174,3 +174,24 @@ or:
 
 - Docker Compose smoke and exact-head GitHub Actions remain unavailable in the current environment.
 - Cross-browser coverage and score calibration remain open.
+
+## 2026-07-25 Runtime Reliability Recheck
+
+### Checked
+
+- Incomplete and complete verification manifests render distinct Planner eligibility states.
+- A single missing requirement renders without malformed punctuation.
+- Browser smoke uses its own missing evidence file rather than developer-local evidence.
+- Docker Compose starts PostgreSQL and the application, then tears all resources down.
+
+### Results
+
+- Full regression and quality/API gate: 59 passed.
+- Chromium browser smoke: passed.
+- Docker Compose/PostgreSQL smoke: passed.
+- Exact-head CI, including the browser smoke job: passed at https://github.com/TomTang701/resume-growth-coach/actions/runs/30180380459.
+- Evidence manifest: all five eligibility requirements passed.
+
+### Remaining Coverage
+
+- Cross-browser and high-volume load coverage remain outside this acceptance gate.

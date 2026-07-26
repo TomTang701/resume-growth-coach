@@ -23,7 +23,7 @@ Create one analysis-page assertion using a deliberately missing `RGC_EVIDENCE_PA
 
 **Step 2: Run the focused test to verify it fails**
 
-Run: `python -m pytest tests/test_api.py -k portfolio -q`  
+Run: `python -m pytest tests/test_api.py -k portfolio -q`
 Expected: failure because the current static project record ignores the evidence manifest.
 
 **Step 3: Write minimal implementation**
@@ -32,7 +32,7 @@ Add a small helper in `app/main.py` that maps `EvidenceChecklist` to `eligible`,
 
 **Step 4: Run focused tests**
 
-Run: `python -m pytest tests/test_api.py -k portfolio -q`  
+Run: `python -m pytest tests/test_api.py -k portfolio -q`
 Expected: pass.
 
 **Step 5: Commit**
@@ -54,7 +54,7 @@ Set `RGC_EVIDENCE_PATH` in the spawned server environment to a missing file bene
 
 **Step 2: Run browser smoke to verify it fails**
 
-Run: `python tools/browser_smoke.py`  
+Run: `python tools/browser_smoke.py`
 Expected: failure until the dynamic status implementation is in place.
 
 **Step 3: Implement CI execution**
@@ -63,7 +63,7 @@ Keep the existing test and Alembic migration steps. Add a separate browser-smoke
 
 **Step 4: Run the local browser gate**
 
-Run: `python tools/browser_smoke.py`  
+Run: `python tools/browser_smoke.py`
 Expected: browser flow passes with deterministic incomplete evidence.
 
 **Step 5: Commit**
@@ -76,9 +76,9 @@ git commit -m "ci: run deterministic browser smoke"
 ### Task 3: Record verification accurately
 
 **Files:**
-- Modify: `DEVELOPMENT_LOG_CN.md`
-- Modify: `DEVELOPMENT_LOG_EN.md`
-- Modify: `TEST_LOG.md`
+- Modify: `docs/DEVELOPMENT_LOG.zh-CN.md`
+- Modify: `docs/DEVELOPMENT_LOG.md`
+- Modify: `docs/TEST_LOG.md`
 
 **Step 1: Append a dated entry**
 
@@ -86,16 +86,16 @@ Record the changed behavior, all local commands, and the exact CI run URL after 
 
 **Step 2: Run full regression and artifact gates**
 
-Run: `python -m pytest -q`  
-Run: `python tools/quality_gate.py`  
-Run: `python tools/browser_smoke.py`  
-Run: `.\tools\run-docker-smoke.ps1`  
-Run: `python tools/record_verification_evidence.py --ci-url <exact-passing-run-url>`
+Run: `.\.venv\Scripts\python.exe -m pytest -q`
+Run: `.\.venv\Scripts\python.exe tools/quality_gate.py`
+Run: `.\.venv\Scripts\python.exe tools/browser_smoke.py`
+Run: `.\scripts\run-docker-smoke.ps1`
+Run: `.\scripts\record-verification-evidence.ps1`
 
 Expected: all tests and local gates pass; the recorded evidence manifest is fully eligible only after exact-head CI succeeds.
 
 **Step 3: Review and commit**
 
-Run: `git diff --check`  
-Run: `git status --short`  
+Run: `git diff --check`
+Run: `git status --short`
 Commit only the three logs and generated manifest if it changed; do not stage unrelated local files.

@@ -5,8 +5,9 @@ from concurrent.futures import ThreadPoolExecutor
 from fastapi.testclient import TestClient
 
 from app import database
+from app.services import portfolio_planner
 from app.main import app, build_portfolio_project_status
-from app.services.portfolio_planner import EvidenceChecklist
+from app.services.portfolio_planner import EvidenceChecklist, current_git_commit
 
 
 def make_client(tmp_path: Path) -> TestClient:
@@ -303,6 +304,10 @@ def test_portfolio_plan_prioritizes_unproven_differentiation_and_reports_complet
 
 
 def test_portfolio_plan_uses_team_manifest_not_resume_growth_coach_manifest(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_planner, "git_worktree_is_clean", lambda _: True)
+    team_root = Path(__file__).resolve().parents[2] / "team-job-workflow"
+    team_commit = current_git_commit(team_root)
+    assert team_commit is not None
     rgc_evidence_path = tmp_path / "rgc-verification-evidence.json"
     rgc_evidence_path.write_text(
         json.dumps({"tests_passed": True, "docker_smoke_passed": True, "ci_passed": True, "documentation_complete": True, "sanitized_demo_verified": True}),
@@ -310,6 +315,7 @@ def test_portfolio_plan_uses_team_manifest_not_resume_growth_coach_manifest(tmp_
     )
     monkeypatch.setenv("RGC_EVIDENCE_PATH", str(rgc_evidence_path))
     monkeypatch.setenv("TJW_EVIDENCE_PATH", str(tmp_path / "missing-team-evidence.json"))
+    monkeypatch.setenv("TJW_REPO_PATH", str(team_root))
     client = make_client(tmp_path)
     resume = client.post("/api/documents/resume", data={"text": "Built FastAPI with Python."}).json()
     job = client.post("/api/documents/job-description", data={"text": "Backend role requiring PostgreSQL, Docker, React, and CI/CD."}).json()
@@ -334,6 +340,7 @@ def test_portfolio_plan_uses_team_manifest_not_resume_growth_coach_manifest(tmp_
                 "ci_passed": True,
                 "documentation_complete": True,
                 "sanitized_demo_verified": True,
+                "verified_commit": team_commit,
             }
         ),
         encoding="utf-8",
@@ -360,6 +367,7 @@ def test_portfolio_plan_uses_team_manifest_not_resume_growth_coach_manifest(tmp_
                 "ci_passed": True,
                 "documentation_complete": True,
                 "sanitized_demo_verified": True,
+                "verified_commit": team_commit,
             }
         ),
         encoding="utf-8",
@@ -407,6 +415,9 @@ def test_ui_template_analysis_shows_incomplete_portfolio_evidence_gate(tmp_path,
 
 
 def test_ui_template_analysis_shows_resume_eligible_portfolio_evidence(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_planner, "git_worktree_is_clean", lambda _: True)
+    project_commit = current_git_commit(Path(__file__).resolve().parents[1])
+    assert project_commit is not None
     evidence_path = tmp_path / "verification-evidence.json"
     evidence_path.write_text(
         json.dumps(
@@ -416,6 +427,7 @@ def test_ui_template_analysis_shows_resume_eligible_portfolio_evidence(tmp_path,
                 "ci_passed": True,
                 "documentation_complete": True,
                 "sanitized_demo_verified": True,
+                "verified_commit": project_commit,
             }
         ),
         encoding="utf-8",

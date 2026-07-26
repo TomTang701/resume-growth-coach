@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -44,10 +45,14 @@ TEAM_TEST_EVIDENCE_FIELDS = (
 def load_evidence(
     evidence_path: Path,
     test_evidence_fields: tuple[str, ...] = ("tests_passed",),
+    expected_commit: str | None = None,
+    enforce_commit: bool = False,
 ) -> EvidenceChecklist:
     try:
         payload = json.loads(evidence_path.read_text(encoding="utf-8-sig"))
     except (OSError, json.JSONDecodeError):
+        return EvidenceChecklist()
+    if enforce_commit and (not expected_commit or payload.get("verified_commit") != expected_commit):
         return EvidenceChecklist()
     return EvidenceChecklist(
         tests_passed=all(payload.get(field) is True for field in test_evidence_fields),
@@ -55,19 +60,68 @@ def load_evidence(
     )
 
 
+def current_git_commit(project_root: Path) -> str | None:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(project_root), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    commit = completed.stdout.strip()
+    return commit or None
+
+
+def git_worktree_is_clean(project_root: Path) -> bool:
+    try:
+        for command in (
+            ["git", "-C", str(project_root), "diff", "--quiet"],
+            ["git", "-C", str(project_root), "diff", "--cached", "--quiet"],
+        ):
+            completed = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=2,
+            )
+            if completed.returncode != 0:
+                return False
+    except OSError:
+        return False
+    return True
+
+
 def load_recorded_evidence() -> EvidenceChecklist:
-    default_path = Path(__file__).resolve().parents[2] / "local_data" / "verification-evidence.json"
+    project_root = Path(__file__).resolve().parents[2]
+    default_path = project_root / "local_data" / "verification-evidence.json"
     evidence_path = Path(os.getenv("RGC_EVIDENCE_PATH", str(default_path)))
-    return load_evidence(evidence_path)
+    if not git_worktree_is_clean(project_root):
+        return EvidenceChecklist()
+    return load_evidence(
+        evidence_path,
+        expected_commit=current_git_commit(project_root),
+        enforce_commit=True,
+    )
 
 
 def load_project_evidence() -> dict[str, EvidenceChecklist]:
     team_evidence_path = os.getenv("TJW_EVIDENCE_PATH")
+    team_path = Path(team_evidence_path) if team_evidence_path else None
+    team_root = Path(os.getenv("TJW_REPO_PATH", str(team_path.parent.parent))) if team_path else None
     return {
         RGC_PROJECT_SLUG: load_recorded_evidence(),
         TEAM_PROJECT_SLUG: (
-            load_evidence(Path(team_evidence_path), test_evidence_fields=TEAM_TEST_EVIDENCE_FIELDS)
-            if team_evidence_path
+            load_evidence(
+                team_path,
+                test_evidence_fields=TEAM_TEST_EVIDENCE_FIELDS,
+                expected_commit=current_git_commit(team_root),
+                enforce_commit=True,
+            )
+            if team_path and team_root and git_worktree_is_clean(team_root)
             else EvidenceChecklist()
         ),
     }

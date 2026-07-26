@@ -86,7 +86,7 @@ Alembic manages fresh PostgreSQL and SQLite schemas. An existing SQLite database
 
 ## Resume Evidence Gate
 
-Portfolio Planner reads its eligibility state from project-specific local evidence files; the API does not accept caller-provided verification flags. Resume Growth Coach uses `local_data/verification-evidence.json` (or `RGC_EVIDENCE_PATH`). A Team Job Workflow proposal stays locked unless `TJW_EVIDENCE_PATH` explicitly points to that project's own generated evidence file, including its backend tests, frontend build, and browser smoke result. Evidence from one project never unlocks another project's resume bullet.
+Portfolio Planner reads its eligibility state from project-specific local evidence files; the API does not accept caller-provided verification flags. Resume Growth Coach uses `local_data/verification-evidence.json` (or `RGC_EVIDENCE_PATH`). A Team Job Workflow proposal stays locked unless `TJW_EVIDENCE_PATH` explicitly points to that project's own generated evidence file, including its backend tests, frontend build, and browser smoke result. Evidence from one project never unlocks another project's resume bullet. Each accepted evidence file must include the exact Git commit it verified; missing or stale commit metadata keeps bullets locked.
 
 Generate the local Resume Growth Coach evidence after substantive changes:
 
@@ -94,7 +94,7 @@ Generate the local Resume Growth Coach evidence after substantive changes:
 .\scripts\record-verification-evidence.ps1 -LocalOnly
 ```
 
-`-LocalOnly` intentionally records Docker and CI as incomplete and exits with code `1`. After Docker smoke passes and the exact commit's GitHub Actions run is green, run without `-LocalOnly`; the script queries that commit's CI result automatically. Only a fully green evidence file can release a resume bullet draft.
+`-LocalOnly` intentionally records Docker and CI as incomplete and exits with code `1`. After Docker smoke passes and the exact commit's GitHub Actions run is green, run without `-LocalOnly`; the script queries that commit's CI result automatically. It also requires no uncommitted tracked source changes. Only a fully green evidence file for the current clean commit can release a resume bullet draft.
 
 Run the real local-model smoke test when Ollama is installed:
 

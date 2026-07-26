@@ -9,6 +9,20 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $root
 $python = Join-Path $root ".venv\Scripts\python.exe"
 $evidencePath = Join-Path $root "local_data\verification-evidence.json"
+$verifiedCommit = git -C $root rev-parse HEAD 2>$null | Select-Object -First 1
+if ($LASTEXITCODE -ne 0 -or -not $verifiedCommit) {
+    $verifiedCommit = $null
+} else {
+    $verifiedCommit = $verifiedCommit.Trim()
+}
+$worktreeClean = $true
+& git -C $root diff --quiet
+if ($LASTEXITCODE -ne 0) { $worktreeClean = $false }
+& git -C $root diff --cached --quiet
+if ($LASTEXITCODE -ne 0) { $worktreeClean = $false }
+if (-not $worktreeClean) {
+    Write-Warning "Tracked source changes are present; resume evidence remains ineligible until they are committed and verified."
+}
 
 if (-not (Test-Path -LiteralPath $python)) {
     Write-Error "Virtual environment was not found at $python"
@@ -39,9 +53,9 @@ if (-not $LocalOnly) {
 }
 
 $ciPassed = $false
-if (-not $LocalOnly -and (Get-Command gh -ErrorAction SilentlyContinue)) {
+if ($worktreeClean -and -not $LocalOnly -and (Get-Command gh -ErrorAction SilentlyContinue)) {
     $repoUrl = git -C $root remote get-url origin 2>$null
-    $commit = git -C $root rev-parse HEAD 2>$null
+    $commit = $verifiedCommit
     if ($repoUrl -match "github\.com[:/](?<owner>[^/]+)/(?<name>[^/.]+)(\.git)?$") {
         $repoName = "$($Matches.owner)/$($Matches.name)"
         $runs = gh run list --repo $repoName --commit $commit --limit 1 --json status,conclusion | ConvertFrom-Json
@@ -56,6 +70,8 @@ $sanitizedDemoVerified = (Test-Path -LiteralPath (Join-Path $root "samples\sanit
 $evidence = [ordered]@{
     generated_at_utc = [DateTime]::UtcNow.ToString("o")
     generated_by = "scripts/record-verification-evidence.ps1"
+    verified_commit = $verifiedCommit
+    worktree_clean = $worktreeClean
     tests_passed = ($testsPassed -and $qualityPassed -and $browserPassed)
     docker_smoke_passed = $dockerPassed
     ci_passed = $ciPassed

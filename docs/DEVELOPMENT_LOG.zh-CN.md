@@ -224,3 +224,29 @@
 ### 仍存在的问题
 
 - Firefox/WebKit 覆盖、高并发负载测试和人工标注的分数校准仍属于后续工作。
+
+## 2026-07-25：当前证据与文档对齐（`d7d32ab`）
+
+### 变更
+
+- 在 `tests/test_parsing.py` 中加入直接回归覆盖：粘贴文本、带 UTF-8 BOM 的文本上传、有界读取、旧编码 fallback 和无效文档输入。
+- 将当前 README 和专业测试报告与已经实现的 PostgreSQL/Alembic/Docker Compose stack 以及 evidence-gated Portfolio Planner 对齐。
+- 保留之前开发日志作为历史记录，不改写其中当时的 SQLite/MVP 验证结果。
+
+### 验证
+
+- 完整本地回归：`70 passed`。
+- Quality gate、Chromium browser smoke 和 Docker Compose/PostgreSQL smoke 均通过。
+- 精确 HEAD 的 CI 已通过 workflow policy、测试与 Alembic migration、browser smoke 和 Docker smoke：https://github.com/TomTang701/resume-growth-coach/actions/runs/30188637133
+- `local_data/verification-evidence.json` 对 `d7d32ab18ed131ad39e70012ef6de6de4b365777` 记录全部资格检查为 true。
+
+### 剩余问题
+
+- Chromium 是唯一的 browser smoke 目标；高并发负载行为和分数校准尚未验证。
+- README 截图刷新需要手动提供的脱敏 UI 图片；生成图片不作为证据。
+
+### 后续工作
+
+- **P0**：当前没有已知 P0 问题。
+- **P1**：在提供手动脱敏截图后刷新 README；如果跨浏览器支持成为需求，再验证 Firefox 和 WebKit 行为。
+- **P2**：在不改变 local-first 隐私边界的前提下，加入负载特征分析和人工标注的分数校准数据集。

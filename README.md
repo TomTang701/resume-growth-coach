@@ -7,7 +7,7 @@ The project runs deterministic analysis before any LLM generation. Ollama is opt
 ## Features
 
 - FastAPI backend with JSON APIs and a local HTML UI
-- SQLite persistence through SQLAlchemy
+- SQLAlchemy persistence with PostgreSQL in Docker Compose, Alembic migrations, and SQLite support for local development and isolated tests
 - Pasted text and `.txt` / `.pdf` document input in both the API and local UI
 - Deterministic skill matching and explainable fit scoring
 - Evidence-aware fit scoring that distinguishes listed skills from project evidence
@@ -196,7 +196,7 @@ Delete the matching local data only after reviewing the dry-run result:
 
 These bullets should only be used after the matching implementation, persistence, UI, and tests are verified:
 
-- Built a local-first AI resume growth coach with FastAPI, SQLite, SQLAlchemy, and Ollama to compare resumes against job descriptions.
-- Implemented deterministic skill matching and gap scoring before LLM generation, reducing dependence on prompt-only analysis.
-- Added PDF/text parsing, persisted analysis history, and generated 2-week, 1-month, and 3-month self-improvement roadmaps.
-- Tested document upload, analysis, and offline LLM fallback flows with pytest and FastAPI TestClient.
+- Built a local-first AI resume growth coach with FastAPI, PostgreSQL, Alembic, Docker Compose, and Ollama to compare resumes against job descriptions.
+- Implemented a Portfolio Planner that ranks non-duplicative project specifications by skill-gap coverage, current project evidence, differentiation signals, and estimated completion cost.
+- Preserved anonymized local-data handling and an Ollama offline fallback without recruiting-platform scraping or automation.
+- Added hash-verified dependency locks, API/browser tests, Docker Compose smoke tests, exact-commit CI, and an evidence gate that releases English resume-bullet drafts only after recorded checks pass.

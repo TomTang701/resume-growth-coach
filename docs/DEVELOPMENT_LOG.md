@@ -224,3 +224,29 @@ User-facing project output must remain English-only. These internal logs are bil
 ### Remaining Problems
 
 - Firefox/WebKit coverage, high-volume load testing, and human-labeled score calibration remain future work.
+
+## 2026-07-25: Current Evidence and Documentation Reconciliation (`d7d32ab`)
+
+### Changes
+
+- Added direct regression coverage for pasted text, UTF-8 BOM text uploads, bounded reads, legacy encoding fallback, and invalid document input in `tests/test_parsing.py`.
+- Reconciled the current README and professional test report with the implemented PostgreSQL/Alembic/Docker Compose stack and the evidence-gated Portfolio Planner.
+- Kept prior development-log entries as historical records instead of rewriting their contemporaneous SQLite/MVP results.
+
+### Verification
+
+- Full local regression: `70 passed`.
+- Quality gate, Chromium browser smoke, and Docker Compose/PostgreSQL smoke passed.
+- Exact-head CI passed for workflow policy, tests and Alembic migration, browser smoke, and Docker smoke: https://github.com/TomTang701/resume-growth-coach/actions/runs/30188637133
+- `local_data/verification-evidence.json` records every eligibility check as true for `d7d32ab18ed131ad39e70012ef6de6de4b365777`.
+
+### Remaining Problems
+
+- Chromium is the only browser smoke target; high-volume load behavior and score calibration remain unverified.
+- README screenshot refresh requires manually captured, sanitized UI images; generated images are not accepted as evidence.
+
+### Future Work
+
+- **P0**: None currently known.
+- **P1**: Refresh README screenshots after manual sanitized captures are provided; verify Firefox and WebKit behavior if cross-browser support becomes a requirement.
+- **P2**: Add load characterization and a human-labeled score-calibration dataset without changing the local-first privacy boundary.

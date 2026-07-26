@@ -2,37 +2,36 @@
 
 ## 测试范围
 
-本报告评估当前 Resume Growth Coach MVP 的正确性、稳定性、数据安全、本地模型集成和实际使用流程。报告不表示匹配分数可以预测真实录用结果。
+本报告评估当前 local-first Resume Growth Coach 的实现：deterministic resume/JD 分析、Portfolio Planner 行为、文档解析、持久化、本地模型 fallback、隐私边界和可复现验证。本报告不表示匹配分数可以预测真实录用结果。
+
+本报告中的最新证据绑定到已验证提交 `d7d32ab18ed131ad39e70012ef6de6de4b365777`。
 
 ## 当前结论
 
-**适合本地 MVP 开发和演示，有条件通过；尚未达到生产级。**
+**项目已通过本地、可复现的作品集使用验证。它刻意保持 local-only，不是已部署的生产服务。**
 
-核心 API、deterministic scoring、fallback、网页文件上传、文件大小控制、文档删除、保留清理和 Chromium 浏览器 smoke 流程均已覆盖并通过。跨浏览器覆盖、完整 migration、高负载压力测试和分数校准仍未完成。
+已验证的实现包括 FastAPI、通过 Docker Compose 运行的 PostgreSQL、Alembic migration、用于隔离本地测试的 SQLite 支持、在可选 Ollama 输出之前执行的 deterministic 分析、Chromium UI smoke 流程，以及用于简历 bullet 资格的 evidence gate。
 
-## 验证证据
+## 已验证证据
 
-- 回归测试：`49 passed，无 warning`。
-- API quality gate：通过。
-- 真实 `qwen2.5:3b` smoke test：通过。
-- 真实无头 Chromium smoke test：通过。
-- 数据库 schema 校验：通过，版本 `1`。
-- Python 编译检查：上一轮修复中已通过。
-- Git 工作区：当前修改提交后应保持干净。
+- 回归测试：`pytest -q` 为 `70 passed`。
+- API quality gate：通过，覆盖 health、analysis、recommendations、UI 文件上传、清理、损坏 PDF、输入限制、HTML escaping 和 not-found 行为。
+- Chromium 浏览器 smoke：通过页面加载、文本与模板分析、Portfolio Planner 展示、校验恢复和文件上传。
+- Docker Compose/PostgreSQL smoke：通过；同时检查发布端口只绑定到 loopback。
+- 精确 HEAD 的 GitHub Actions CI：workflow policy、测试与 Alembic migration、browser smoke 和 Docker smoke 均通过：https://github.com/TomTang701/resume-growth-coach/actions/runs/30188637133
+- 本地 evidence manifest：已验证提交的全部简历资格检查均为 true，包括文档和脱敏演示数据检查。
+- 公开演示只使用脱敏的示例简历和 JD 数据。
 
-## 已修复问题
+## 已覆盖行为
 
-- UI/API 现在支持文本或 `.txt/.pdf` 文件输入。
-- 上传采用分块读取，并限制为 5 MB。
-- analysis、skill matches、growth goals 使用一个事务保存。
-- 删除文档时会删除关联 analysis 记录。
-- 提供默认 dry-run 的按时间清理命令。
-- 已覆盖五组评分 golden cases 和并发 SQLite API 流程。
-- 已覆盖 12 路文件型 SQLite 并发 API smoke 流程。
-- LLM 非英文用户可见字段会安全 fallback。
-- fallback 文档已改为 deterministic fallback，不再描述不存在的第二模型。
+- 文本、`.txt` 和 `.pdf` 输入，包括有界文件读取、校验错误、规范化和旧编码 fallback。
+- Deterministic 技能匹配、项目证据分析、差距评分和岗位模板推荐。
+- Portfolio Planner 可接收内置模板、手动粘贴描述或上传 JD；会抑制重复的项目建议。
+- 持久化、文档删除、数据保留清理，以及由 Alembic 管理的全新 PostgreSQL 和 SQLite schema。
+- 当本地模型不可用时，Ollama summary 会退回 deterministic fallback。
+- 由 evidence 推导的简历 bullet 资格：API 调用方不能通过提交自己的 verification flags 解锁项目。
 
-## 按优先级剩余问题
+## 有意保留的边界与待完成项
 
 ### P0
 
@@ -40,16 +39,29 @@
 
 ### P1
 
-- Chromium 浏览器 smoke 覆盖已配置并通过。
-- Firefox/WebKit、跨浏览器行为和 CI 浏览器执行仍未验证。
+- README 截图刷新等待手动提供的脱敏 UI 截图。Agent 生成的图片不作为验证证据。
+- 已覆盖 Chromium smoke；Firefox 和 WebKit 行为尚未验证。
 
 ### P2
 
-- 已有 schema version marker 和结构保护，但尚未实现历史 SQLite migration 脚本。
-- 12 路 SQLite 并发 smoke test 已通过；高负载写入和压力行为仍未正式测试。
-- 匹配分数没有人工标注数据校准。
-- Starlette 测试客户端现在使用兼容的 `httpx2` 开发依赖；当前环境中的原有警告已消除。
+- 尚未提供高并发负载行为和人工标注的分数校准数据集。
+- 项目没有部署，也不自动化招聘平台活动。
 
-## 下一道质量门禁建议
+## 复现验证
 
-在宣称生产级之前，应将浏览器测试加入 CI、建立 migration 策略、扩展 SQLite 并发压力测试，并定义标注分数校准数据。在此之前，项目应描述为“经过测试的 local MVP”。
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe tools\quality_gate.py
+.\.venv\Scripts\python.exe tools\browser_smoke.py
+.\scripts\run-docker-smoke.ps1
+```
+
+在精确提交的 CI 变绿且 tracked worktree 干净后，记录简历资格证据：
+
+```powershell
+.\scripts\record-verification-evidence.ps1
+```
+
+## 描述边界
+
+可以使用由本地实现和记录证据支撑的描述：FastAPI、PostgreSQL、Alembic、Docker Compose、deterministic 分析、Ollama fallback、API/browser 测试和精确提交 CI。不要声称 production deployment、招聘预测准确率、招聘平台自动化、跨浏览器覆盖或尚未验证的 load-test 结果。

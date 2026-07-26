@@ -1,4 +1,4 @@
-"""Run a real Chromium smoke test against a temporary local app database."""
+"""Run a real browser smoke test against a temporary local app database."""
 
 from __future__ import annotations
 
@@ -15,6 +15,14 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE_URL = "http://127.0.0.1:8765"
+SUPPORTED_BROWSERS = ("chromium", "firefox", "webkit")
+
+
+def resolve_browser_name(value: str) -> str:
+    if value not in SUPPORTED_BROWSERS:
+        supported = ", ".join(SUPPORTED_BROWSERS)
+        raise ValueError(f"Unsupported browser {value!r}; expected one of: {supported}.")
+    return value
 
 
 def wait_for_server(timeout: float = 30.0) -> None:
@@ -30,6 +38,7 @@ def wait_for_server(timeout: float = 30.0) -> None:
 
 
 def main() -> int:
+    browser_name = resolve_browser_name(os.environ.get("RGC_BROWSER", "chromium"))
     with tempfile.TemporaryDirectory(prefix="resume-growth-browser-") as temp_dir:
         env = os.environ.copy()
         env["RGC_DATABASE_URL"] = f"sqlite:///{Path(temp_dir) / 'browser.sqlite3'}"
@@ -45,7 +54,7 @@ def main() -> int:
         try:
             wait_for_server()
             with sync_playwright() as playwright:
-                browser = playwright.chromium.launch(headless=True)
+                browser = getattr(playwright, browser_name).launch(headless=True)
                 page = browser.new_page()
                 page.goto(BASE_URL, wait_until="domcontentloaded")
                 assert page.title() == "Resume Growth Coach"
@@ -67,7 +76,9 @@ def main() -> int:
                 page.goto(BASE_URL, wait_until="domcontentloaded")
                 page.locator("#resume_text").fill("Built Python APIs with Git.")
                 page.get_by_role("button", name="Run analysis").click()
-                assert page.locator("text=Job description content is required.").count() == 1
+                validation_error = page.get_by_text("Job description content is required.", exact=True)
+                validation_error.wait_for(state="visible")
+                assert validation_error.count() == 1
 
                 resume_path = Path(temp_dir) / "resume.txt"
                 job_path = Path(temp_dir) / "job.txt"
@@ -85,7 +96,10 @@ def main() -> int:
                 server.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 server.kill()
-    print("Browser smoke test passed: page load, text and template analysis, planner display, validation recovery, and file upload.")
+    print(
+        f"{browser_name} browser smoke test passed: page load, text and template analysis, "
+        "planner display, validation recovery, and file upload."
+    )
     return 0
 
 

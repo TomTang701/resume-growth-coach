@@ -4,21 +4,21 @@
 
 本报告评估当前 local-first Resume Growth Coach 的实现：deterministic resume/JD 分析、Portfolio Planner 行为、文档解析、持久化、本地模型 fallback、隐私边界和可复现验证。本报告不表示匹配分数可以预测真实录用结果。
 
-本报告引用已验证源提交 `d7d32ab18ed131ad39e70012ef6de6de4b365777`。当前简历资格声明必须始终通过绑定到精确当前提交的本地 evidence manifest 刷新。
+本报告记录已分别验证的行为。当前简历资格声明必须始终通过绑定到精确当前提交的本地 evidence manifest 刷新。
 
 ## 当前结论
 
 **项目已通过本地、可复现的作品集使用验证。它刻意保持 local-only，不是已部署的生产服务。**
 
-已验证的实现包括 FastAPI、通过 Docker Compose 运行的 PostgreSQL、Alembic migration、用于隔离本地测试的 SQLite 支持、在可选 Ollama 输出之前执行的 deterministic 分析、Chromium UI smoke 流程，以及用于简历 bullet 资格的 evidence gate。
+已验证的实现包括 FastAPI、通过 Docker Compose 运行的 PostgreSQL、Alembic migration、用于隔离本地测试的 SQLite 支持、在可选 Ollama 输出之前执行的 deterministic 分析、跨浏览器 UI smoke 覆盖，以及用于简历 bullet 资格的 evidence gate。
 
 ## 已验证证据
 
 - 回归测试：`pytest -q` 为 `70 passed`。
 - API quality gate：通过，覆盖 health、analysis、recommendations、UI 文件上传、清理、损坏 PDF、输入限制、HTML escaping 和 not-found 行为。
-- Chromium 浏览器 smoke：通过页面加载、文本与模板分析、Portfolio Planner 展示、校验恢复和文件上传。
+- Chromium、Firefox 和 WebKit 浏览器 smoke：均通过页面加载、文本与模板分析、Portfolio Planner 展示、校验恢复和文件上传。
 - Docker Compose/PostgreSQL smoke：通过；同时检查发布端口只绑定到 loopback。
-- 精确 HEAD 的 GitHub Actions CI：workflow policy、测试与 Alembic migration、browser smoke 和 Docker smoke 均通过：https://github.com/TomTang701/resume-growth-coach/actions/runs/30188637133
+- 精确 HEAD 的 GitHub Actions CI 会运行 workflow policy、测试与 Alembic migration、Chromium/Firefox/WebKit browser-smoke 矩阵和 Docker smoke；evidence manifest 会记录对应精确提交的结果。
 - 本地 evidence manifest：已验证提交的全部简历资格检查均为 true，包括文档和脱敏演示数据检查。
 - 公开演示只使用脱敏的示例简历和 JD 数据。
 
@@ -40,7 +40,6 @@
 ### P1
 
 - README 截图刷新等待手动提供的脱敏 UI 截图。Agent 生成的图片不作为验证证据。
-- 已覆盖 Chromium smoke；Firefox 和 WebKit 行为尚未验证。
 
 ### P2
 

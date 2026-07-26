@@ -4,21 +4,21 @@
 
 This report evaluates the current local-first Resume Growth Coach implementation: deterministic resume/JD analysis, Portfolio Planner behavior, document parsing, persistence, local-model fallback, privacy boundaries, and reproducible verification. It does not claim that a fit score predicts hiring outcomes.
 
-This report references verified source revision `d7d32ab18ed131ad39e70012ef6de6de4b365777`. A current resume-eligibility claim must always be refreshed through the local evidence manifest for the exact checked-out commit.
+This report records individually verified behaviors. A current resume-eligibility claim must always be refreshed through the local evidence manifest for the exact checked-out commit.
 
 ## Current Verdict
 
 **Passed for local, reproducible portfolio use. The project is intentionally local-only and is not a deployed production service.**
 
-The verified implementation includes FastAPI, PostgreSQL through Docker Compose, Alembic migrations, SQLite support for isolated local tests, deterministic analysis before optional Ollama output, a Chromium UI smoke flow, and an evidence gate for resume-bullet eligibility.
+The verified implementation includes FastAPI, PostgreSQL through Docker Compose, Alembic migrations, SQLite support for isolated local tests, deterministic analysis before optional Ollama output, cross-browser UI smoke coverage, and an evidence gate for resume-bullet eligibility.
 
 ## Verified Evidence
 
 - Regression suite: `70 passed` with `pytest -q`.
 - API quality gate: passed, including health, analysis, recommendations, UI file upload, cleanup, malformed PDF, input limits, HTML escaping, and not-found behavior.
-- Chromium browser smoke: passed for page load, text and template analysis, Portfolio Planner display, validation recovery, and file upload.
+- Chromium, Firefox, and WebKit browser smoke: passed for page load, text and template analysis, Portfolio Planner display, validation recovery, and file upload.
 - Docker Compose/PostgreSQL smoke: passed; the published port is checked to bind only to loopback.
-- Exact-head GitHub Actions CI: passed for workflow policy, tests and Alembic migration, browser smoke, and Docker smoke: https://github.com/TomTang701/resume-growth-coach/actions/runs/30188637133
+- Exact-head GitHub Actions CI runs workflow policy, tests and Alembic migration, a Chromium/Firefox/WebKit browser-smoke matrix, and Docker smoke; the evidence manifest records the matching exact-commit result.
 - Local evidence manifest: all resume-eligibility checks are true for the verified revision, including documentation and sanitized-demo checks.
 - Public demonstrations use sanitized sample resume and job-description data only.
 
@@ -40,7 +40,6 @@ None currently known.
 ### P1
 
 - README screenshot refresh awaits manually captured, sanitized UI screenshots. Agent-generated images are not accepted as verification evidence.
-- Chromium smoke is covered; Firefox and WebKit behavior have not been verified.
 
 ### P2
 

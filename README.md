@@ -102,11 +102,20 @@ Run the real local-model smoke test when Ollama is installed:
 .\scripts\run-ollama-smoke-test.ps1
 ```
 
-Install the Chromium browser once, then run the real UI smoke test:
+Install the default Chromium browser once, then run the real UI smoke test:
 
 ```powershell
 python -m playwright install chromium
 .\.venv\Scripts\python.exe tools\browser_smoke.py
+```
+
+To run the same smoke flow in Firefox or WebKit, install the requested Playwright browser and set `RGC_BROWSER` to `firefox` or `webkit` before invoking the script. GitHub Actions runs Chromium, Firefox, and WebKit for every checked commit:
+
+```powershell
+python -m playwright install firefox
+$env:RGC_BROWSER = "firefox"
+.\.venv\Scripts\python.exe tools\browser_smoke.py
+Remove-Item Env:RGC_BROWSER
 ```
 
 Validate the local database schema and version marker:

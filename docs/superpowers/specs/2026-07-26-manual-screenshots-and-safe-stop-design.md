@@ -24,7 +24,7 @@ The walkthrough headings and alt text will match those four screens. Obsolete le
 `Stop-ResumeGrowthCoach.cmd` will call `Stop-ResumeGrowthCoach.ps1`. The stop script will:
 
 1. Read the local PID record.
-2. Confirm the recorded process still exists and is a `cmd.exe` ancestor whose command line includes this checkout's absolute Python path and `uvicorn app.main:app`.
+2. Confirm the recorded process still exists and is this checkout's direct `python.exe` launcher whose command line includes its absolute Python path and `uvicorn app.main:app`.
 3. Confirm a descendant owns the loopback listener on port 8000.
 4. Terminate that recorded process tree with `taskkill /PID <pid> /T /F` and remove the PID record.
 

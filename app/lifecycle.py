@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -36,7 +37,9 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate local server lifecycle metadata.")
     parser.add_argument("--record-path", required=True, type=Path)
     parser.add_argument("--checkout", required=True, type=Path)
-    parser.add_argument("--observed-command", required=True)
+    observed_command = parser.add_mutually_exclusive_group(required=True)
+    observed_command.add_argument("--observed-command")
+    observed_command.add_argument("--observed-command-base64")
     return parser.parse_args(argv)
 
 
@@ -47,11 +50,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (OSError, json.JSONDecodeError):
         return 1
 
+    try:
+        observed_command = (
+            args.observed_command
+            if args.observed_command is not None
+            else base64.b64decode(args.observed_command_base64, validate=True).decode("utf-8")
+        )
+    except (ValueError, UnicodeDecodeError):
+        return 1
+
     return int(
         not lifecycle_record_is_valid(
             payload,
             checkout=args.checkout,
-            observed_command=args.observed_command,
+            observed_command=observed_command,
         )
     )
 

@@ -1,9 +1,10 @@
 #requires -Version 5.1
-[CmdletBinding(SupportsShouldProcess)]
+[CmdletBinding()]
 param(
     [Parameter(Mandatory)]
     [ValidateSet("Start", "Stop", "Status")]
-    [string]$Action
+    [string]$Action,
+    [switch]$WhatIf
 )
 
 $ErrorActionPreference = "Stop"
@@ -60,22 +61,23 @@ function Get-RecordedServer {
     if ($null -eq $rootProcess) {
         throw "The recorded process $rootPid no longer exists. Refusing to stop any other process."
     }
-    if ($rootProcess.Name -ine "cmd.exe") {
-        throw "The recorded process is not cmd.exe. Refusing to stop it."
+    if ($rootProcess.Name -ine "python.exe") {
+        throw "The recorded process is not the expected Python launcher. Refusing to stop it."
     }
 
     $commandLine = [string]$rootProcess.CommandLine
     if ($commandLine.IndexOf($python, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
-        throw "The recorded cmd.exe process does not contain this checkout's Python path. Refusing to stop it."
+        throw "The recorded Python process does not contain this checkout's Python path. Refusing to stop it."
     }
     if ($commandLine.IndexOf($commandMarker, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
-        throw "The recorded cmd.exe process does not contain the expected Uvicorn command. Refusing to stop it."
+        throw "The recorded Python process does not contain the expected Uvicorn command. Refusing to stop it."
     }
     if (-not (Test-Path -LiteralPath $python)) {
         throw "The expected local Python executable is missing. Refusing to stop without validating the record."
     }
 
-    & $python -m app.lifecycle --record-path $statePath --checkout $root --observed-command $commandLine
+    $encodedCommandLine = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($commandLine))
+    & $python -m app.lifecycle --record-path $statePath --checkout $root --observed-command-base64 $encodedCommandLine
     if ($LASTEXITCODE -ne 0) {
         throw "The local-server record does not match this checkout and command. Refusing to stop it."
     }
@@ -112,8 +114,8 @@ function Start-RecordedServer {
 
     & (Join-Path $PSScriptRoot "ensure-ollama.ps1")
 
-    $serverCommand = "`"$python`" -m uvicorn app.main:app --app-dir `"$root`" --reload"
-    $process = Start-Process -FilePath $env:ComSpec -ArgumentList @("/k", $serverCommand) -WorkingDirectory $root -PassThru
+    $serverArguments = "-m uvicorn app.main:app --app-dir `"$root`" --reload"
+    $process = Start-Process -FilePath $python -ArgumentList $serverArguments -WorkingDirectory $root -PassThru
 
     $ready = $false
     for ($attempt = 0; $attempt -lt 30; $attempt++) {
@@ -154,7 +156,7 @@ switch ($Action) {
     "Stop" {
         $server = Get-RecordedServer
         $target = "recorded Resume Growth Coach process tree rooted at PID $($server.RootProcess.ProcessId)"
-        if ($PSCmdlet.ShouldProcess($target, "Stop")) {
+        if (-not $WhatIf) {
             & taskkill.exe /PID $server.RootProcess.ProcessId /T /F | Out-Host
             if ($LASTEXITCODE -ne 0) {
                 throw "taskkill failed for the validated process tree."

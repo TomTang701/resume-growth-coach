@@ -108,7 +108,7 @@ Expected: import failure because the lifecycle validator does not exist.
 
 - [ ] **Step 3: Implement lifecycle module and wrappers**
 
-Start uses absolute Python and --app-dir arguments, waits for /health, then writes { pid, checkout, command_marker }. Stop traces recorded PID descendants via Get-CimInstance Win32_Process, requires a port-8000 listener below the verified tree, and invokes taskkill /PID <recorded-pid> /T /F only after all checks. WhatIf runs all checks but skips taskkill.
+Start uses the absolute Python executable and --app-dir arguments directly, waits for /health, then writes { pid, checkout, command_marker }. Stop traces recorded PID descendants via Get-CimInstance Win32_Process, requires a port-8000 listener below the verified tree, and invokes taskkill /PID <recorded-pid> /T /F only after all checks. WhatIf runs all checks but skips taskkill.
 
 - [ ] **Step 4: Verify lifecycle behavior**
 

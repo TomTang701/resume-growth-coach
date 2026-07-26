@@ -126,7 +126,7 @@ def build_portfolio_plan(
     evidence_by_project: dict[str, EvidenceChecklist],
     existing_project_evidence: list[str] | None = None,
 ) -> list[PortfolioProposal]:
-    normalized_existing = {name.casefold() for name in existing_project_names}
+    normalized_existing = {name.strip().casefold() for name in existing_project_names}
     missing = set(missing_skills)
     evidence_text = " ".join(existing_project_evidence or []).casefold()
     proposals: list[PortfolioProposal] = []

@@ -54,3 +54,13 @@ def test_planner_excludes_existing_project_and_releases_bullet_only_after_eviden
     assert all(item.slug != "resume-growth-coach-upgrade" for item in plan)
     assert plan[0].resume_eligible is True
     assert plan[0].english_resume_bullet_draft
+
+
+def test_planner_excludes_existing_project_when_name_has_surrounding_whitespace():
+    plan = build_portfolio_plan(
+        missing_skills=["PostgreSQL", "Docker", "React", "CI/CD"],
+        existing_project_names=["  Team Job Workflow  "],
+        evidence_by_project={},
+    )
+
+    assert all(item.slug != "team-job-workflow" for item in plan)

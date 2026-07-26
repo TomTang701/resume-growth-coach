@@ -9,8 +9,9 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $root
 $python = Join-Path $root ".venv\Scripts\python.exe"
 $evidencePath = Join-Path $root "local_data\verification-evidence.json"
-$verifiedCommit = git -C $root rev-parse HEAD 2>$null | Select-Object -First 1
-if ($LASTEXITCODE -ne 0 -or -not $verifiedCommit) {
+$verifiedCommit = [string](& git -C $root rev-parse HEAD 2>$null)
+$gitExitCode = $LASTEXITCODE
+if ($gitExitCode -ne 0 -or -not $verifiedCommit) {
     $verifiedCommit = $null
 } else {
     $verifiedCommit = $verifiedCommit.Trim()
@@ -53,7 +54,7 @@ if (-not $LocalOnly) {
 }
 
 $ciPassed = $false
-if ($worktreeClean -and -not $LocalOnly -and (Get-Command gh -ErrorAction SilentlyContinue)) {
+if ($worktreeClean -and $verifiedCommit -and -not $LocalOnly -and (Get-Command gh -ErrorAction SilentlyContinue)) {
     $repoUrl = git -C $root remote get-url origin 2>$null
     $commit = $verifiedCommit
     if ($repoUrl -match "github\.com[:/](?<owner>[^/]+)/(?<name>[^/.]+)(\.git)?$") {

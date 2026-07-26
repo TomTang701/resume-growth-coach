@@ -7,7 +7,7 @@ Set-Location -LiteralPath $PSScriptRoot
 $python = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
 if (-not (Test-Path -LiteralPath $python)) {
     Write-Host "Virtual environment was not found." -ForegroundColor Red
-    Write-Host "Run: python -m venv .venv; .\.venv\Scripts\python.exe -m pip install -r requirements.lock"
+    Write-Host "Run: python -m venv .venv; .\.venv\Scripts\python.exe -m pip install --require-hashes -r requirements.lock"
     Read-Host "Press Enter to exit"
     exit 1
 }

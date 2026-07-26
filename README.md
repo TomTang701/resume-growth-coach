@@ -24,7 +24,7 @@ Create and activate a virtual environment, then install dependencies:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.lock
+python -m pip install --require-hashes -r requirements.lock
 ```
 
 After setup, launch the app with the one-click helper from the project root:

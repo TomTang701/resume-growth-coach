@@ -79,6 +79,8 @@ class PortfolioProposal:
     name: str
     summary: str
     gap_coverage: list[str]
+    differentiation_opportunities: list[str]
+    estimated_completion_cost: str
     acceptance_criteria: list[str]
     resume_eligible: bool
     english_resume_bullet_draft: str | None
@@ -90,6 +92,9 @@ PROJECT_CATALOG = (
         "name": "Resume Growth Coach Upgrade",
         "existing_name": "Resume Growth Coach",
         "keywords": ("PostgreSQL", "Docker", "CI/CD", "Database Design"),
+        "differentiation_signals": ("LLM", "Ollama", "Document Parsing"),
+        "completion_cost": 3,
+        "completion_cost_label": "medium",
         "summary": "Upgrade the local-first analysis service with reproducible database, container, and CI evidence.",
         "bullet": "Hardened a local-first FastAPI analysis service with PostgreSQL, Docker Compose, and automated CI validation.",
     },
@@ -98,6 +103,9 @@ PROJECT_CATALOG = (
         "name": "Team Job Workflow",
         "existing_name": "Team Job Workflow",
         "keywords": ("PostgreSQL", "Docker", "React", "CI/CD", "REST APIs", "Testing"),
+        "differentiation_signals": ("React", "JWT", "role-based access control", "activity audit"),
+        "completion_cost": 5,
+        "completion_cost_label": "high",
         "summary": "Build a role-aware team application workflow with a React client and FastAPI API.",
         "bullet": "Built a full-stack team job workflow with React, FastAPI, PostgreSQL, JWT role controls, Docker Compose, and automated tests.",
     },
@@ -116,9 +124,11 @@ def build_portfolio_plan(
     missing_skills: list[str],
     existing_project_names: list[str],
     evidence_by_project: dict[str, EvidenceChecklist],
+    existing_project_evidence: list[str] | None = None,
 ) -> list[PortfolioProposal]:
     normalized_existing = {name.casefold() for name in existing_project_names}
     missing = set(missing_skills)
+    evidence_text = " ".join(existing_project_evidence or []).casefold()
     proposals: list[PortfolioProposal] = []
     for project in PROJECT_CATALOG:
         if project["existing_name"].casefold() in normalized_existing:
@@ -126,6 +136,9 @@ def build_portfolio_plan(
         coverage = [skill for skill in project["keywords"] if skill in missing]
         if not coverage:
             continue
+        differentiation_opportunities = [
+            signal for signal in project["differentiation_signals"] if signal.casefold() not in evidence_text
+        ]
         eligible = evidence_by_project.get(project["slug"], EvidenceChecklist()).resume_eligible
         proposals.append(
             PortfolioProposal(
@@ -133,9 +146,20 @@ def build_portfolio_plan(
                 name=project["name"],
                 summary=project["summary"],
                 gap_coverage=coverage,
+                differentiation_opportunities=differentiation_opportunities,
+                estimated_completion_cost=project["completion_cost_label"],
                 acceptance_criteria=ACCEPTANCE_CRITERIA,
                 resume_eligible=eligible,
                 english_resume_bullet_draft=project["bullet"] if eligible else None,
             )
         )
-    return sorted(proposals, key=lambda proposal: (-len(proposal.gap_coverage), proposal.name))
+    completion_costs = {project["slug"]: project["completion_cost"] for project in PROJECT_CATALOG}
+    return sorted(
+        proposals,
+        key=lambda proposal: (
+            -len(proposal.gap_coverage),
+            -len(proposal.differentiation_opportunities),
+            completion_costs[proposal.slug],
+            proposal.name,
+        ),
+    )

@@ -164,6 +164,7 @@ def create_portfolio_plan(payload: PortfolioPlanCreate, db: Session = Depends(ge
         missing_skills=deterministic["missing_skills"],
         existing_project_names=payload.existing_project_names,
         evidence_by_project=load_project_evidence(),
+        existing_project_evidence=deterministic.get("matched_project_evidence", []),
     )
     return {
         "analysis_id": analysis.id,
@@ -173,6 +174,8 @@ def create_portfolio_plan(payload: PortfolioPlanCreate, db: Session = Depends(ge
                 "name": proposal.name,
                 "summary": proposal.summary,
                 "gap_coverage": proposal.gap_coverage,
+                "differentiation_opportunities": proposal.differentiation_opportunities,
+                "estimated_completion_cost": proposal.estimated_completion_cost,
                 "acceptance_criteria": proposal.acceptance_criteria,
                 "resume_eligible": proposal.resume_eligible,
                 "english_resume_bullet_draft": proposal.english_resume_bullet_draft,
@@ -302,6 +305,7 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         missing_skills=deterministic["missing_skills"],
         existing_project_names=EXISTING_PROJECT_NAMES,
         evidence_by_project=evidence_by_project,
+        existing_project_evidence=deterministic.get("matched_project_evidence", []),
     )
     goals = {
         row.horizon: json.loads(row.goals_json)

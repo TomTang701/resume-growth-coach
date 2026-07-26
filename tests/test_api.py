@@ -276,6 +276,32 @@ def test_portfolio_plan_ignores_client_claimed_evidence_without_local_manifest(t
     assert proposal["english_resume_bullet_draft"] is None
 
 
+def test_portfolio_plan_prioritizes_unproven_differentiation_and_reports_completion_cost(tmp_path, monkeypatch):
+    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(tmp_path / "missing-verification-evidence.json"))
+    client = make_client(tmp_path)
+    resume = client.post(
+        "/api/documents/resume",
+        data={"text": "Built a Python local LLM service with Ollama and document parsing."},
+    ).json()
+    job = client.post(
+        "/api/documents/job-description",
+        data={"text": "Backend Software Engineer\nRequired: Python, PostgreSQL, Docker, CI/CD."},
+    ).json()
+    analysis = client.post(
+        "/api/analyses",
+        json={"resume_id": resume["resume_id"], "job_description_id": job["job_description_id"]},
+    ).json()
+
+    response = client.post(
+        "/api/portfolio-plans",
+        json={"analysis_id": analysis["analysis_id"], "existing_project_names": ["Amazon Clone"]},
+    )
+
+    proposal = response.json()["proposals"][0]
+    assert proposal["slug"] == "team-job-workflow"
+    assert proposal["estimated_completion_cost"] == "high"
+
+
 def test_portfolio_plan_uses_team_manifest_not_resume_growth_coach_manifest(tmp_path, monkeypatch):
     rgc_evidence_path = tmp_path / "rgc-verification-evidence.json"
     rgc_evidence_path.write_text(

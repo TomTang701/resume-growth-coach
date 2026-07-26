@@ -123,6 +123,8 @@
                       <h3>{{ proposal.name }}</h3>
                       <p>{{ proposal.summary }}</p>
                       <p class="section-note">Gap coverage: {{ proposal.gap_coverage | join(', ') }}</p>
+                      <p class="section-note">Distinctive evidence to add: {{ proposal.differentiation_opportunities | join(', ') }}</p>
+                      <p class="section-note">Estimated completion cost: {{ proposal.estimated_completion_cost }}</p>
                       {% if proposal.resume_eligible %}
                         <p>{{ proposal.english_resume_bullet_draft }}</p>
                       {% else %}

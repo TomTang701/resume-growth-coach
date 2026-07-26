@@ -13,7 +13,7 @@ The project runs deterministic analysis before any LLM generation. Ollama is opt
 - Evidence-aware fit scoring that distinguishes listed skills from project evidence
 - Optional Ollama summaries with offline fallback
 - Growth goals for 2-week, 1-month, and 3-month horizons
-- Portfolio Planner that ranks non-duplicative project proposals from verified skill gaps
+- Portfolio Planner that ranks non-duplicative project proposals by skill-gap coverage, existing project evidence, differentiation opportunities, and estimated completion cost
 - Resume-eligibility gate that withholds resume bullets until tests, Docker, CI, documentation, and sanitized-demo evidence are supplied
 - pytest coverage for parsing, matching, API flow, and fallback behavior
 

@@ -32,16 +32,30 @@ EVIDENCE_FIELDS = (
     "documentation_complete",
     "sanitized_demo_verified",
 )
+RGC_PROJECT_SLUG = "resume-growth-coach-upgrade"
+TEAM_PROJECT_SLUG = "team-job-workflow"
 
 
-def load_recorded_evidence() -> EvidenceChecklist:
-    default_path = Path(__file__).resolve().parents[2] / "local_data" / "verification-evidence.json"
-    evidence_path = Path(os.getenv("RGC_EVIDENCE_PATH", str(default_path)))
+def load_evidence(evidence_path: Path) -> EvidenceChecklist:
     try:
         payload = json.loads(evidence_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return EvidenceChecklist()
     return EvidenceChecklist(**{field: payload.get(field) is True for field in EVIDENCE_FIELDS})
+
+
+def load_recorded_evidence() -> EvidenceChecklist:
+    default_path = Path(__file__).resolve().parents[2] / "local_data" / "verification-evidence.json"
+    evidence_path = Path(os.getenv("RGC_EVIDENCE_PATH", str(default_path)))
+    return load_evidence(evidence_path)
+
+
+def load_project_evidence() -> dict[str, EvidenceChecklist]:
+    team_evidence_path = os.getenv("TJW_EVIDENCE_PATH")
+    return {
+        RGC_PROJECT_SLUG: load_recorded_evidence(),
+        TEAM_PROJECT_SLUG: load_evidence(Path(team_evidence_path)) if team_evidence_path else EvidenceChecklist(),
+    }
 
 
 @dataclass(frozen=True)
@@ -57,7 +71,7 @@ class PortfolioProposal:
 
 PROJECT_CATALOG = (
     {
-        "slug": "resume-growth-coach-upgrade",
+        "slug": RGC_PROJECT_SLUG,
         "name": "Resume Growth Coach Upgrade",
         "existing_name": "Resume Growth Coach",
         "keywords": ("PostgreSQL", "Docker", "CI/CD", "Database Design"),
@@ -65,7 +79,7 @@ PROJECT_CATALOG = (
         "bullet": "Hardened a local-first FastAPI analysis service with PostgreSQL, Docker Compose, and automated CI validation.",
     },
     {
-        "slug": "team-job-workflow",
+        "slug": TEAM_PROJECT_SLUG,
         "name": "Team Job Workflow",
         "existing_name": "Team Job Workflow",
         "keywords": ("PostgreSQL", "Docker", "React", "CI/CD", "REST APIs", "Testing"),
@@ -86,7 +100,7 @@ ACCEPTANCE_CRITERIA = [
 def build_portfolio_plan(
     missing_skills: list[str],
     existing_project_names: list[str],
-    evidence: EvidenceChecklist,
+    evidence_by_project: dict[str, EvidenceChecklist],
 ) -> list[PortfolioProposal]:
     normalized_existing = {name.casefold() for name in existing_project_names}
     missing = set(missing_skills)
@@ -97,7 +111,7 @@ def build_portfolio_plan(
         coverage = [skill for skill in project["keywords"] if skill in missing]
         if not coverage:
             continue
-        eligible = evidence.resume_eligible
+        eligible = evidence_by_project.get(project["slug"], EvidenceChecklist()).resume_eligible
         proposals.append(
             PortfolioProposal(
                 slug=project["slug"],

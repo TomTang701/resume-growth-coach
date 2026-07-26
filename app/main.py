@@ -17,7 +17,7 @@ from app.services.matching import analyze_resume_against_job, extract_skills, in
 from app.services.job_templates import get_job_template, list_job_templates
 from app.services.ollama import generate_llm_analysis
 from app.services.parsing import detect_resume_sections, extract_input_text, preview_text
-from app.services.portfolio_planner import EvidenceChecklist, build_portfolio_plan, load_recorded_evidence
+from app.services.portfolio_planner import EvidenceChecklist, RGC_PROJECT_SLUG, build_portfolio_plan, load_project_evidence
 
 
 @asynccontextmanager
@@ -163,7 +163,7 @@ def create_portfolio_plan(payload: PortfolioPlanCreate, db: Session = Depends(ge
     proposals = build_portfolio_plan(
         missing_skills=deterministic["missing_skills"],
         existing_project_names=payload.existing_project_names,
-        evidence=load_recorded_evidence(),
+        evidence_by_project=load_project_evidence(),
     )
     return {
         "analysis_id": analysis.id,
@@ -297,11 +297,11 @@ def fetch_analysis(db: Session, analysis_id: int) -> models.Analysis:
 
 def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
     deterministic = json.loads(analysis.deterministic_result_json)
-    evidence = load_recorded_evidence()
+    evidence_by_project = load_project_evidence()
     portfolio_plan = build_portfolio_plan(
         missing_skills=deterministic["missing_skills"],
         existing_project_names=EXISTING_PROJECT_NAMES,
-        evidence=evidence,
+        evidence_by_project=evidence_by_project,
     )
     goals = {
         row.horizon: json.loads(row.goals_json)
@@ -327,7 +327,7 @@ def build_analysis_payload(db: Session, analysis: models.Analysis) -> dict:
         "recommended_matching_jobs": recommend_matching_jobs(analysis.resume.content, analysis.job_description.content),
         "english_resume_bullet_drafts": deterministic.get("resume_bullet_drafts", []),
         "portfolio_plan": portfolio_plan,
-        "active_portfolio_projects": [build_portfolio_project_status(evidence)],
+        "active_portfolio_projects": [build_portfolio_project_status(evidence_by_project[RGC_PROJECT_SLUG])],
         "deterministic_details": deterministic,
     }
 

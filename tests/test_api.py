@@ -276,17 +276,35 @@ def test_portfolio_plan_ignores_client_claimed_evidence_without_local_manifest(t
     assert proposal["english_resume_bullet_draft"] is None
 
 
-def test_portfolio_plan_unlocks_only_from_verified_local_manifest(tmp_path, monkeypatch):
-    evidence_path = tmp_path / "verification-evidence.json"
-    evidence_path.write_text(
+def test_portfolio_plan_uses_team_manifest_not_resume_growth_coach_manifest(tmp_path, monkeypatch):
+    rgc_evidence_path = tmp_path / "rgc-verification-evidence.json"
+    rgc_evidence_path.write_text(
         json.dumps({"tests_passed": True, "docker_smoke_passed": True, "ci_passed": True, "documentation_complete": True, "sanitized_demo_verified": True}),
         encoding="utf-8",
     )
-    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(evidence_path))
+    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(rgc_evidence_path))
+    monkeypatch.setenv("TJW_EVIDENCE_PATH", str(tmp_path / "missing-team-evidence.json"))
     client = make_client(tmp_path)
     resume = client.post("/api/documents/resume", data={"text": "Built FastAPI with Python."}).json()
     job = client.post("/api/documents/job-description", data={"text": "Backend role requiring PostgreSQL, Docker, React, and CI/CD."}).json()
     analysis = client.post("/api/analyses", json={"resume_id": resume["resume_id"], "job_description_id": job["job_description_id"]}).json()
+
+    response = client.post(
+        "/api/portfolio-plans",
+        json={"analysis_id": analysis["analysis_id"], "existing_project_names": ["Resume Growth Coach"]},
+    )
+
+    proposal = response.json()["proposals"][0]
+    assert proposal["resume_eligible"] is False
+    assert proposal["english_resume_bullet_draft"] is None
+
+    team_evidence_path = tmp_path / "team-verification-evidence.json"
+    team_evidence_path.write_text(
+        json.dumps({"tests_passed": True, "docker_smoke_passed": True, "ci_passed": True, "documentation_complete": True, "sanitized_demo_verified": True}),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(tmp_path / "missing-rgc-evidence.json"))
+    monkeypatch.setenv("TJW_EVIDENCE_PATH", str(team_evidence_path))
 
     response = client.post(
         "/api/portfolio-plans",

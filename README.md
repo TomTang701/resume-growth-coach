@@ -70,7 +70,7 @@ The quality gate runs the regression suite and API contract checks using a tempo
 
 ## Reproducible PostgreSQL Run
 
-Docker Compose starts PostgreSQL and the application, runs Alembic migrations, and exposes the local UI at `http://127.0.0.1:8000`:
+Docker Compose starts PostgreSQL and the application, runs Alembic migrations, and exposes the local UI at `http://127.0.0.1:8000`. The published port is bound only to the local machine and the smoke test verifies that runtime mapping. The Python and PostgreSQL base images are pinned to verified multi-architecture OCI digests; update a digest only with a new full verification run:
 
 ```powershell
 .\scripts\run-docker-smoke.ps1

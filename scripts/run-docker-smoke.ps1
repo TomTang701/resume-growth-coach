@@ -31,6 +31,8 @@ try {
         docker compose logs
         throw "Docker service did not become healthy."
     }
+    & (Join-Path $PSScriptRoot "assert-local-port-bindings.ps1")
+    if ($LASTEXITCODE -ne 0) { throw "Compose loopback port binding check failed with exit code $LASTEXITCODE." }
     Write-Host "Docker smoke test passed." -ForegroundColor Green
 } finally {
     docker compose down --volumes --remove-orphans

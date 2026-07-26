@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:16-alpine@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777
     environment:
       POSTGRES_DB: resume_growth_coach
       POSTGRES_USER: resume_growth_coach
@@ -18,7 +18,7 @@ services:
     environment:
       RGC_DATABASE_URL: postgresql+psycopg://resume_growth_coach:local-development-only@db:5432/resume_growth_coach
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       db:
         condition: service_healthy

@@ -4,7 +4,7 @@ cd /d "%~dp0"
 
 if not exist ".venv\Scripts\python.exe" (
   echo Virtual environment was not found.
-  echo Run: python -m venv .venv && .venv\Scripts\python.exe -m pip install -r requirements.txt
+  echo Run: python -m venv .venv && .venv\Scripts\python.exe -m pip install -r requirements.lock
   pause
   exit /b 1
 )

@@ -28,3 +28,10 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - run: python -m playwright install --with-deps chromium
       - run: python tools/browser_smoke.py
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: ./scripts/run-docker-smoke.ps1

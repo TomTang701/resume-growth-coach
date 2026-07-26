@@ -4,7 +4,7 @@
 
 This report evaluates the current local-first Resume Growth Coach implementation: deterministic resume/JD analysis, Portfolio Planner behavior, document parsing, persistence, local-model fallback, privacy boundaries, and reproducible verification. It does not claim that a fit score predicts hiring outcomes.
 
-The latest evidence in this report is tied to verified revision `d7d32ab18ed131ad39e70012ef6de6de4b365777`.
+This report references verified source revision `d7d32ab18ed131ad39e70012ef6de6de4b365777`. A current resume-eligibility claim must always be refreshed through the local evidence manifest for the exact checked-out commit.
 
 ## Current Verdict
 

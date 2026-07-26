@@ -4,7 +4,7 @@
 
 本报告评估当前 local-first Resume Growth Coach 的实现：deterministic resume/JD 分析、Portfolio Planner 行为、文档解析、持久化、本地模型 fallback、隐私边界和可复现验证。本报告不表示匹配分数可以预测真实录用结果。
 
-本报告中的最新证据绑定到已验证提交 `d7d32ab18ed131ad39e70012ef6de6de4b365777`。
+本报告引用已验证源提交 `d7d32ab18ed131ad39e70012ef6de6de4b365777`。当前简历资格声明必须始终通过绑定到精确当前提交的本地 evidence manifest 刷新。
 
 ## 当前结论
 

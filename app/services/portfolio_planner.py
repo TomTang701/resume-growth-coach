@@ -34,14 +34,25 @@ EVIDENCE_FIELDS = (
 )
 RGC_PROJECT_SLUG = "resume-growth-coach-upgrade"
 TEAM_PROJECT_SLUG = "team-job-workflow"
+TEAM_TEST_EVIDENCE_FIELDS = (
+    "backend_tests_passed",
+    "frontend_tests_and_build_passed",
+    "browser_ui_smoke_passed",
+)
 
 
-def load_evidence(evidence_path: Path) -> EvidenceChecklist:
+def load_evidence(
+    evidence_path: Path,
+    test_evidence_fields: tuple[str, ...] = ("tests_passed",),
+) -> EvidenceChecklist:
     try:
-        payload = json.loads(evidence_path.read_text(encoding="utf-8"))
+        payload = json.loads(evidence_path.read_text(encoding="utf-8-sig"))
     except (OSError, json.JSONDecodeError):
         return EvidenceChecklist()
-    return EvidenceChecklist(**{field: payload.get(field) is True for field in EVIDENCE_FIELDS})
+    return EvidenceChecklist(
+        tests_passed=all(payload.get(field) is True for field in test_evidence_fields),
+        **{field: payload.get(field) is True for field in EVIDENCE_FIELDS if field != "tests_passed"},
+    )
 
 
 def load_recorded_evidence() -> EvidenceChecklist:
@@ -54,7 +65,11 @@ def load_project_evidence() -> dict[str, EvidenceChecklist]:
     team_evidence_path = os.getenv("TJW_EVIDENCE_PATH")
     return {
         RGC_PROJECT_SLUG: load_recorded_evidence(),
-        TEAM_PROJECT_SLUG: load_evidence(Path(team_evidence_path)) if team_evidence_path else EvidenceChecklist(),
+        TEAM_PROJECT_SLUG: (
+            load_evidence(Path(team_evidence_path), test_evidence_fields=TEAM_TEST_EVIDENCE_FIELDS)
+            if team_evidence_path
+            else EvidenceChecklist()
+        ),
     }
 
 

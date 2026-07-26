@@ -1,4 +1,26 @@
-from app.services.portfolio_planner import EvidenceChecklist, build_portfolio_plan
+import codecs
+import json
+
+from app.services.portfolio_planner import EvidenceChecklist, build_portfolio_plan, load_recorded_evidence
+
+
+def test_recorded_evidence_accepts_windows_powershell_utf8_bom(tmp_path, monkeypatch):
+    evidence_path = tmp_path / "verification-evidence.json"
+    evidence_path.write_bytes(
+        codecs.BOM_UTF8
+        + json.dumps(
+            {
+                "tests_passed": True,
+                "docker_smoke_passed": True,
+                "ci_passed": True,
+                "documentation_complete": True,
+                "sanitized_demo_verified": True,
+            }
+        ).encode("utf-8")
+    )
+    monkeypatch.setenv("RGC_EVIDENCE_PATH", str(evidence_path))
+
+    assert load_recorded_evidence().resume_eligible is True
 
 
 def test_planner_ranks_team_workflow_for_uncovered_full_stack_gaps():

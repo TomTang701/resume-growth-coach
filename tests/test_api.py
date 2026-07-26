@@ -300,12 +300,44 @@ def test_portfolio_plan_uses_team_manifest_not_resume_growth_coach_manifest(tmp_
 
     team_evidence_path = tmp_path / "team-verification-evidence.json"
     team_evidence_path.write_text(
-        json.dumps({"tests_passed": True, "docker_smoke_passed": True, "ci_passed": True, "documentation_complete": True, "sanitized_demo_verified": True}),
+        json.dumps(
+            {
+                "backend_tests_passed": True,
+                "frontend_tests_and_build_passed": True,
+                "docker_smoke_passed": True,
+                "ci_passed": True,
+                "documentation_complete": True,
+                "sanitized_demo_verified": True,
+            }
+        ),
         encoding="utf-8",
     )
     monkeypatch.setenv("RGC_EVIDENCE_PATH", str(tmp_path / "missing-rgc-evidence.json"))
     monkeypatch.setenv("TJW_EVIDENCE_PATH", str(team_evidence_path))
 
+    response = client.post(
+        "/api/portfolio-plans",
+        json={"analysis_id": analysis["analysis_id"], "existing_project_names": ["Resume Growth Coach"]},
+    )
+
+    proposal = response.json()["proposals"][0]
+    assert proposal["resume_eligible"] is False
+    assert proposal["english_resume_bullet_draft"] is None
+
+    team_evidence_path.write_text(
+        json.dumps(
+            {
+                "backend_tests_passed": True,
+                "frontend_tests_and_build_passed": True,
+                "browser_ui_smoke_passed": True,
+                "docker_smoke_passed": True,
+                "ci_passed": True,
+                "documentation_complete": True,
+                "sanitized_demo_verified": True,
+            }
+        ),
+        encoding="utf-8",
+    )
     response = client.post(
         "/api/portfolio-plans",
         json={"analysis_id": analysis["analysis_id"], "existing_project_names": ["Resume Growth Coach"]},

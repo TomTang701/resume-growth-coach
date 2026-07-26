@@ -86,7 +86,7 @@ Alembic manages fresh PostgreSQL and SQLite schemas. An existing SQLite database
 
 ## Resume Evidence Gate
 
-Portfolio Planner reads its eligibility state from project-specific local evidence files; the API does not accept caller-provided verification flags. Resume Growth Coach uses `local_data/verification-evidence.json` (or `RGC_EVIDENCE_PATH`). A Team Job Workflow proposal stays locked unless `TJW_EVIDENCE_PATH` explicitly points to that project's own generated evidence file. Evidence from one project never unlocks another project's resume bullet.
+Portfolio Planner reads its eligibility state from project-specific local evidence files; the API does not accept caller-provided verification flags. Resume Growth Coach uses `local_data/verification-evidence.json` (or `RGC_EVIDENCE_PATH`). A Team Job Workflow proposal stays locked unless `TJW_EVIDENCE_PATH` explicitly points to that project's own generated evidence file, including its backend tests, frontend build, and browser smoke result. Evidence from one project never unlocks another project's resume bullet.
 
 Generate the local Resume Growth Coach evidence after substantive changes:
 

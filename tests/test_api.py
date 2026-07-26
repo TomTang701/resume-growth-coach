@@ -305,9 +305,9 @@ def test_portfolio_plan_prioritizes_unproven_differentiation_and_reports_complet
 
 def test_portfolio_plan_uses_team_manifest_not_resume_growth_coach_manifest(tmp_path, monkeypatch):
     monkeypatch.setattr(portfolio_planner, "git_worktree_is_clean", lambda _: True)
-    team_root = Path(__file__).resolve().parents[2] / "team-job-workflow"
-    team_commit = current_git_commit(team_root)
-    assert team_commit is not None
+    team_root = tmp_path / "team-job-workflow"
+    team_commit = "verified-team-commit"
+    monkeypatch.setattr(portfolio_planner, "current_git_commit", lambda _: team_commit)
     rgc_evidence_path = tmp_path / "rgc-verification-evidence.json"
     rgc_evidence_path.write_text(
         json.dumps({"tests_passed": True, "docker_smoke_passed": True, "ci_passed": True, "documentation_complete": True, "sanitized_demo_verified": True}),

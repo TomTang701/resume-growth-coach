@@ -250,3 +250,28 @@ User-facing project output must remain English-only. These internal logs are bil
 - **P0**: None currently known.
 - **P1**: Refresh README screenshots after manual sanitized captures are provided; verify Firefox and WebKit behavior if cross-browser support becomes a requirement.
 - **P2**: Add load characterization and a human-labeled score-calibration dataset without changing the local-first privacy boundary.
+
+## 2026-07-26: Current Documentation Reconciliation (`443c5fc`)
+
+### Changes
+
+- Recorded the four manually captured, sanitized README screenshots and the guarded local stop command in the current-status documentation.
+- Reconciled the professional test report with the implemented Chromium, Firefox, and WebKit CI smoke matrix.
+- Preserved earlier development-log entries as historical records instead of changing their contemporaneous test counts or implementation limits.
+
+### Verification
+
+- Full local regression: `79 passed`.
+- The README screenshot-documentation test confirms all four current manual assets are referenced.
+- Exact-head CI passed for workflow policy, tests and Alembic migration, Chromium/Firefox/WebKit browser smoke, and Docker smoke: https://github.com/TomTang701/resume-growth-coach/actions/runs/30195978576
+
+### Remaining Problems
+
+- High-volume load behavior and human-labeled score calibration remain unverified.
+- The project remains local-first and does not deploy or automate recruiting-platform activity.
+
+### Future Work
+
+- **P0**: None currently known.
+- **P1**: None currently known.
+- **P2**: Add load characterization and a human-labeled score-calibration dataset without changing the local-first privacy boundary.

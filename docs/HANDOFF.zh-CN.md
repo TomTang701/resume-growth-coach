@@ -6,7 +6,7 @@
 
 1. 阅读 `PROJECT_SPEC.md`、`docs/DEVELOPMENT_LOG.md`、`docs/TEST_LOG.md` 和 `docs/TEST_REPORT.md`。
 2. 确认工作区干净，然后运行 `scripts/run-quality-gate.ps1`。
-3. 本地使用时双击 `Start-ResumeGrowthCoach.cmd`；它会检查 Ollama 和 `qwen2.5:3b`。
+3. 本地使用时双击 `Start-ResumeGrowthCoach.cmd`；它会检查 Ollama 和 `qwen2.5:3b`。使用完成后运行 `Stop-ResumeGrowthCoach.cmd`；它只会停止由当前 checkout 启动且已验证的本地服务器进程。
 4. 修改 scoring、parsing、recommendations、persistence 或 API contract 后，更新测试以及相关日志的中英文两份文件。
 
 ## 较大修改日志模板

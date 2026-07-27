@@ -250,3 +250,28 @@
 - **P0**：当前没有已知 P0 问题。
 - **P1**：在提供手动脱敏截图后刷新 README；如果跨浏览器支持成为需求，再验证 Firefox 和 WebKit 行为。
 - **P2**：在不改变 local-first 隐私边界的前提下，加入负载特征分析和人工标注的分数校准数据集。
+
+## 2026-07-26：当前文档对齐（`443c5fc`）
+
+### 修改内容
+
+- 在当前状态文档中记录四张手动截取、已脱敏的 README 截图，以及带保护的本地停止命令。
+- 将专业测试报告与已实现的 Chromium、Firefox 和 WebKit CI 冒烟矩阵对齐。
+- 保留更早的开发日志作为历史记录，不更改其当时的测试数量或实现边界。
+
+### 验证结果
+
+- 完整本地回归：`79 passed`。
+- README 截图文档测试确认已引用全部四个当前手工资源。
+- 精确 HEAD 的 CI 已通过 workflow policy、测试与 Alembic migration、Chromium/Firefox/WebKit browser smoke 和 Docker smoke：https://github.com/TomTang701/resume-growth-coach/actions/runs/30195978576
+
+### 剩余问题
+
+- 高并发负载行为和人工标注的分数校准尚未验证。
+- 项目仍保持 local-first，不部署，也不自动化招聘平台活动。
+
+### 后续工作
+
+- **P0**：当前没有已知 P0 问题。
+- **P1**：当前没有已知 P1 问题。
+- **P2**：在不改变 local-first 隐私边界的前提下，加入负载特征分析和人工标注的分数校准数据集。

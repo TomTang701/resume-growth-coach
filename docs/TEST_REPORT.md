@@ -14,7 +14,7 @@ The verified implementation includes FastAPI, PostgreSQL through Docker Compose,
 
 ## Verified Evidence
 
-- Regression suite: `70 passed` with `pytest -q`.
+- Regression suite: `79 passed` with `pytest -q`.
 - API quality gate: passed, including health, analysis, recommendations, UI file upload, cleanup, malformed PDF, input limits, HTML escaping, and not-found behavior.
 - Chromium, Firefox, and WebKit browser smoke: passed for page load, text and template analysis, Portfolio Planner display, validation recovery, and file upload.
 - Docker Compose/PostgreSQL smoke: passed; the published port is checked to bind only to loopback.
@@ -39,7 +39,7 @@ None currently known.
 
 ### P1
 
-- README screenshot refresh awaits manually captured, sanitized UI screenshots. Agent-generated images are not accepted as verification evidence.
+None currently known.
 
 ### P2
 
@@ -63,4 +63,4 @@ After the exact commit's CI is green and the tracked worktree is clean, record t
 
 ## Claim Guidance
 
-Use claims supported by the verified local stack and recorded evidence: FastAPI, PostgreSQL, Alembic, Docker Compose, deterministic analysis, Ollama fallback, API/browser tests, and exact-commit CI. Do not claim production deployment, hiring prediction accuracy, recruiting-platform automation, cross-browser coverage, or load-test results that have not been verified.
+Use claims supported by the verified local stack and recorded evidence: FastAPI, PostgreSQL, Alembic, Docker Compose, deterministic analysis, Ollama fallback, API/browser tests, and exact-commit CI. Do not claim production deployment, hiring prediction accuracy, recruiting-platform automation, or load-test results that have not been verified. Cross-browser claims must stay scoped to the verified Chromium, Firefox, and WebKit smoke paths.

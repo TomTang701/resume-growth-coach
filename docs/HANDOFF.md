@@ -6,7 +6,7 @@ This is the default English handoff document. The Chinese counterpart is [HANDOF
 
 1. Read `PROJECT_SPEC.md`, `docs/DEVELOPMENT_LOG.md`, `docs/TEST_LOG.md`, and `docs/TEST_REPORT.md`.
 2. Confirm the worktree is clean, then run `scripts/run-quality-gate.ps1`.
-3. Double-click `Start-ResumeGrowthCoach.cmd` for local use; it checks Ollama and `qwen2.5:3b`.
+3. Double-click `Start-ResumeGrowthCoach.cmd` for local use; it checks Ollama and `qwen2.5:3b`. Use `Stop-ResumeGrowthCoach.cmd` when finished; it only stops the verified local server process started from this checkout.
 4. After changing scoring, parsing, recommendations, persistence, or an API contract, update tests and both language versions of the relevant logs.
 
 ## Major-Change Log Template

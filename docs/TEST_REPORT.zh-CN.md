@@ -14,7 +14,7 @@
 
 ## 已验证证据
 
-- 回归测试：`pytest -q` 为 `70 passed`。
+- 回归测试：`pytest -q` 为 `79 passed`。
 - API quality gate：通过，覆盖 health、analysis、recommendations、UI 文件上传、清理、损坏 PDF、输入限制、HTML escaping 和 not-found 行为。
 - Chromium、Firefox 和 WebKit 浏览器 smoke：均通过页面加载、文本与模板分析、Portfolio Planner 展示、校验恢复和文件上传。
 - Docker Compose/PostgreSQL smoke：通过；同时检查发布端口只绑定到 loopback。
@@ -39,7 +39,7 @@
 
 ### P1
 
-- README 截图刷新等待手动提供的脱敏 UI 截图。Agent 生成的图片不作为验证证据。
+当前没有已知 P1 问题。
 
 ### P2
 
@@ -63,4 +63,4 @@
 
 ## 描述边界
 
-可以使用由本地实现和记录证据支撑的描述：FastAPI、PostgreSQL、Alembic、Docker Compose、deterministic 分析、Ollama fallback、API/browser 测试和精确提交 CI。不要声称 production deployment、招聘预测准确率、招聘平台自动化、跨浏览器覆盖或尚未验证的 load-test 结果。
+可以使用由本地实现和记录证据支撑的描述：FastAPI、PostgreSQL、Alembic、Docker Compose、deterministic 分析、Ollama fallback、API/browser 测试和精确提交 CI。不要声称 production deployment、招聘预测准确率、招聘平台自动化或尚未验证的 load-test 结果。跨浏览器描述必须限定为已验证的 Chromium、Firefox 和 WebKit smoke 路径。
